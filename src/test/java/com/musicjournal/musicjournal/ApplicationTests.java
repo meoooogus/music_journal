@@ -1,4 +1,4 @@
-package com.example.musicjournal;
+package com.musicjournal.musicjournal;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
