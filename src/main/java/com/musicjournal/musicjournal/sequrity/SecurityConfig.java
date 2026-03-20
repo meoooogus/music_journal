@@ -18,8 +18,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http
-                .csrf(csrf -> csrf.disable()) // API 테스트로 CSRF 보호 비활성화
+                .csrf(csrf -> csrf.disable())// API 테스트로 CSRF 보호 비활성화
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().permitAll()
                 ); // 모든 요청 허용 (로그인/JWT 구현 X)
 
