@@ -1,18 +1,15 @@
 package com.musicjournal.musicjournal.domain.auth.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  // JPA 전용, 외부 직접 생성 차단
+@AllArgsConstructor(access = AccessLevel.PRIVATE)   // Builder 전용, 외부 호출 불가
 @Table(name = "refresh_tokens") // DB 네이밍 컨벤션에 맞추기위해 (복수형)
 public class RefreshToken {
 
