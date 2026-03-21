@@ -16,5 +16,5 @@ spring:
 jwt:
   secret-key: ${JWT_SECRET}   # 환경변수 설정 필요
   expiration:
-    access-token: 86400000   # 24h (ms)
+    access-token: 900000   # 15min (ms)
   issuer: musicjournal
