@@ -34,5 +34,5 @@ public class RefreshToken {
 
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(this.expiresAt);
-    }
+    } // DB 저장 시간 기준으로 서버에서 직접 검증
 }
