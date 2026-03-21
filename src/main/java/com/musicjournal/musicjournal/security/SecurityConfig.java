@@ -1,4 +1,4 @@
-package com.musicjournal.musicjournal.sequrity;
+package com.musicjournal.musicjournal.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
