@@ -1,14 +1,21 @@
 package com.musicjournal.musicjournal.security;
 
+import com.musicjournal.musicjournal.security.jwt.JwtFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtFilter jwtFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -16,14 +23,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())// API 테스트로 CSRF 보호 비활성화
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+                .csrf(csrf -> csrf.disable()) // JWT 기반 stateless -> CSRF 불필요
+
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 서버 세션 생성 금지
+
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // H2 console iframe 허용
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .anyRequest().permitAll()
-                ); // 모든 요청 허용 (로그인/JWT 구현 X)
+                        .requestMatchers("/auth/**", "/h2-console/**").permitAll() // 인증 없이 접근 가능
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) ; // JWT 검증을 Security 필터 앞에 삽입
+
 
         return http.build();
     }
