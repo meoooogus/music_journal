@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +14,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
@@ -43,12 +45,12 @@ public class JwtTokenProvider {
         try {
             parseClaims(token);
             return true;
-        } catch (SecurityException | MalformedJwtException exception) {
-            // 서명 불일치 또는 잘못된 토큰 형식
+        } catch (SecurityException | MalformedJwtException e) {
+            log.warn("서명 불일치 또는 잘못된 토큰 형식: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            // 만료된 토큰 -> 클라이언트는 재발급 요청
+            log.warn("만료된 토큰 - subject: {}", e.getClaims().getSubject());
         } catch (UnsupportedJwtException | IllegalArgumentException e) {
-            // 지원하지 않는 형식 또는 빈 값
+            log.warn("지원하지 않는 형식 또는 빈 토큰: {}", e.getMessage());
         }
         return false;
     }
