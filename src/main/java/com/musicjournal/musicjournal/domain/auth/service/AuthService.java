@@ -20,7 +20,7 @@ public class AuthService {
             throw new RuntimeException("이미 존재하는 이메일입니다.");
         }
 
-        String hashedPassword = passwordEncoder.encode(dto.getPasswd());
+        String hashedPassword = passwordEncoder.encode(dto.getPassword());
 
         User user = User.builder()
                 .email(dto.getEmail())
