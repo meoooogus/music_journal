@@ -25,5 +25,6 @@ public class JwtProperties {
     @Setter
     public static class Expiration {
         private long accessToken;
+        private long refreshToken;
     } // 내부 클래스를 만들어 yml 계층 구조를 표현
 }

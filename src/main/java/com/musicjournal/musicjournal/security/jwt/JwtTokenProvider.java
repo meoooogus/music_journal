@@ -29,17 +29,29 @@ public class JwtTokenProvider {
 
     // Access Token 생성
     public String generateAccessToken(String email) {
+        return generateToken(email, jwtProperties.getExpiration().getAccessToken());
+    }
+
+    // Refresh Token 생성
+    public String generateRefreshToken(String email) {
+        return generateToken(email, jwtProperties.getExpiration().getRefreshToken());
+    }
+
+    // 토큰 생성 공통 로직
+    private String generateToken(String email, long expirationMs) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + jwtProperties.getExpiration().getAccessToken());
+        Date expiry = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(email)
                 .issuer(jwtProperties.getIssuer())
                 .issuedAt(now)
-                .expiration(expiry)         // 만료 시작
+                .expiration(expiry)         // 만료 시간
                 .signWith(getSigningKey())  // 서명 - 위변조 방지
                 .compact();
     }
+
+
 
     public boolean validateToken(String token) {
         try {
