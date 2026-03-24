@@ -78,7 +78,8 @@ public class JwtTokenProvider {
         );
     }
 
-    private String getEmail(String token) {
+    // 토큰에서 이메일(subject) 추출 — refresh 재발급 시 AuthService에서 사용
+    public String getEmail(String token) {
         return parseClaims(token).getSubject();
     }
 

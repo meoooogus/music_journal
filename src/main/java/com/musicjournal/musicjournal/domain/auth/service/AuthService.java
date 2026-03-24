@@ -79,4 +79,37 @@ public class AuthService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    public LoginResDto refresh(String refreshToken) {
+        //1. 서명/만료 검증
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new RuntimeException("유효하지 않은 refresh token입니다.");
+        }
+
+        String email = jwtTokenProvider.getEmail(refreshToken);
+
+        //2. DB 저장된 토큰과 일치 여부 확인 - 탈취된 토큰 차단
+        RefreshToken stored = refreshTokenRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("refresh token이 존재하지 않습니다."));
+
+        if (!stored.getToken().equals(refreshToken)) {
+            throw new RuntimeException("refresh token이 일치하지 않습니다.");
+        }
+
+        //3. 새로운 AccessToken 발급
+        String newAccessToken = jwtTokenProvider.generateAccessToken(email);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(email);
+
+        LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(
+                jwtProperties.getExpiration().getRefreshToken() / 1000
+        );
+
+        //4. refresh token rotation - 기존 토큰 무효화 후 새 토큰으로 갱신
+        stored.updateToken(newRefreshToken, expiresAt);
+
+        return LoginResDto.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
 }
