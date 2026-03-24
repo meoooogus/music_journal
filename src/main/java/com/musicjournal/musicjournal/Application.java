@@ -1,4 +1,4 @@
-package com.example.musicjournal;
+package com.musicjournal.musicjournal;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
