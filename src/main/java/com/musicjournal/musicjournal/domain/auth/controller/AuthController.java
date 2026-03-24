@@ -2,6 +2,7 @@ package com.musicjournal.musicjournal.domain.auth.controller;
 
 import com.musicjournal.musicjournal.domain.auth.dto.LoginReqDto;
 import com.musicjournal.musicjournal.domain.auth.dto.LoginResDto;
+import com.musicjournal.musicjournal.domain.auth.dto.RefreshReqDto;
 import com.musicjournal.musicjournal.domain.auth.dto.SignupReqDto;
 import com.musicjournal.musicjournal.domain.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -28,4 +29,9 @@ public class AuthController {
     public ResponseEntity<LoginResDto> login(@RequestBody LoginReqDto loginReqDto) {
         return ResponseEntity.ok(authService.login(loginReqDto));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResDto> refresh(@RequestBody RefreshReqDto refreshReqDto) {
+        return ResponseEntity.ok(authService.refresh(refreshReqDto.getRefreshToken()));
+    } // 토큰 url 노출 방지
 }
