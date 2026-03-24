@@ -1,6 +1,7 @@
 package com.musicjournal.musicjournal.security.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +62,7 @@ public class JwtTokenProvider {
             log.warn("서명 불일치 또는 잘못된 토큰 형식: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
             log.warn("만료된 토큰 - subject: {}", e.getClaims().getSubject());
-        } catch (UnsupportedJwtException | IllegalArgumentException e) {
+        } catch (UnsupportedJwtException | IllegalArgumentException | DecodingException e) {
             log.warn("지원하지 않는 형식 또는 빈 토큰: {}", e.getMessage());
         }
         return false;
