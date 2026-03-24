@@ -1,5 +1,7 @@
 package com.musicjournal.musicjournal.domain.auth.controller;
 
+import com.musicjournal.musicjournal.domain.auth.dto.LoginReqDto;
+import com.musicjournal.musicjournal.domain.auth.dto.LoginResDto;
 import com.musicjournal.musicjournal.domain.auth.dto.SignupReqDto;
 import com.musicjournal.musicjournal.domain.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -21,4 +23,9 @@ public class AuthController {
         authService.signUp(signupReqDto);
         return ResponseEntity.ok("회원가입 완료");
     } // HTTP 응답 직접 컨트롤하기 위한 객체
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResDto> login(@RequestBody LoginReqDto loginReqDto) {
+        return ResponseEntity.ok(authService.login(loginReqDto));
+    }
 }
