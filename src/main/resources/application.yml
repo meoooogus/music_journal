@@ -19,3 +19,9 @@ jwt:
     access-token: 900000      # 15min (ms)
     refresh-token: 604800000  # 7days (ms)
   issuer: musicjournal
+
+spotify:
+  client-id: ${SPOTIFY_CLIENT_ID}
+  client-secret: ${SPOTIFY_CLIENT_SECRET}
+  token-url: https://accounts.spotify.com/api/token
+  api-base-url: https://api.spotify.com/v1
