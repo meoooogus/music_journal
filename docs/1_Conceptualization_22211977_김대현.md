@@ -2,6 +2,7 @@
 
 ## Project Title : MusicJournal
 #### 22211977, 김대현, kdh031230@gmail.com
+#### GitHub Repository: https://github.com/meoooogus/music_journal
 
 ___
 
