@@ -29,7 +29,7 @@ public class Record {
     private Track track;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDate recordedDate;
 
     // 코멘트 없이 기록만 남길 수 있도록
     private String comment;
