@@ -1,13 +1,12 @@
 package com.musicjournal.musicjournal.domain.track.controller;
 
+import com.musicjournal.musicjournal.domain.track.dto.TrackReqDto;
 import com.musicjournal.musicjournal.domain.track.dto.TrackResDto;
+import com.musicjournal.musicjournal.domain.track.service.TrackService;
 import com.musicjournal.musicjournal.spotify.SpotifySearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,9 +16,15 @@ import java.util.List;
 public class TrackController {
 
     private final SpotifySearchService spotifySearchService;
+    private final TrackService trackService;
 
     @GetMapping("/search")
     public ResponseEntity<List<TrackResDto>> search(@RequestParam String q) {
         return ResponseEntity.ok(spotifySearchService.search(q));
+    }
+
+    @PostMapping
+    public ResponseEntity<TrackResDto> save(@RequestBody TrackReqDto dto) {
+        return ResponseEntity.ok(trackService.upsert(dto));
     }
 }
