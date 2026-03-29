@@ -4,6 +4,7 @@ import com.musicjournal.musicjournal.domain.track.dto.TrackReqDto;
 import com.musicjournal.musicjournal.domain.track.dto.TrackResDto;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
 import com.musicjournal.musicjournal.domain.track.entity.TrackRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class TrackService {
     private final TrackRepository trackRepository;
 
+    @Transactional
     public TrackResDto upsert(TrackReqDto dto) {
         Track track = trackRepository.findBySpotifyId(dto.getSpotifyId())
                 .orElseGet(() -> trackRepository.save(
