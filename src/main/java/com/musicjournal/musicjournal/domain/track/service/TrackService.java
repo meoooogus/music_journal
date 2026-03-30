@@ -4,7 +4,7 @@ import com.musicjournal.musicjournal.domain.track.dto.TrackReqDto;
 import com.musicjournal.musicjournal.domain.track.dto.TrackResDto;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
 import com.musicjournal.musicjournal.domain.track.entity.TrackRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
