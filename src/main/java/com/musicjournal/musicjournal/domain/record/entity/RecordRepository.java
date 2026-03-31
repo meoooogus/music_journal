@@ -10,4 +10,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 
     // 특정 유저의 특정 날짜 기록 목록 조회
     List<Record> findByUserAndRecordedDate(User user, LocalDate recordedDate);
+
+    // 전체 목록 조회
+    List<Record> findByUser(User user);
 }
