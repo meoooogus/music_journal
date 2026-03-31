@@ -7,7 +7,7 @@ import com.musicjournal.musicjournal.domain.record.dto.RecordResDto;
 import com.musicjournal.musicjournal.domain.record.entity.Record;
 import com.musicjournal.musicjournal.domain.record.entity.RecordRepository;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
-import com.musicjournal.musicjournal.domain.track.entity.TrackRepository;
+import com.musicjournal.musicjournal.domain.track.service.TrackService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +21,12 @@ import java.util.List;
 public class RecordService {
 
     private final RecordRepository recordRepository;
-    private final TrackRepository trackRepository;
+    private final TrackService trackService;
 
     @Transactional
     public RecordResDto createRecord(RecordReqDto dto, CustomUserDetails userDetails) {
-        Track track = trackRepository.findBySpotifyId(dto.getSpotifyId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 트랙입니다."));
+        // TrackService를 통해 upsert — 레이어 원칙 준수
+        Track track = trackService.upsert(dto.getTrack());
 
         // 현재 로그인 유저 조회
         User user = userDetails.getUser();

@@ -25,6 +25,6 @@ public class TrackController {
 
     @PostMapping
     public ResponseEntity<TrackResDto> save(@RequestBody TrackReqDto dto) {
-        return ResponseEntity.ok(trackService.upsert(dto));
+        return ResponseEntity.ok(TrackResDto.from(trackService.upsert(dto)));
     }
 }

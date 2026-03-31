@@ -1,7 +1,6 @@
 package com.musicjournal.musicjournal.domain.track.service;
 
 import com.musicjournal.musicjournal.domain.track.dto.TrackReqDto;
-import com.musicjournal.musicjournal.domain.track.dto.TrackResDto;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
 import com.musicjournal.musicjournal.domain.track.entity.TrackRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +13,8 @@ public class TrackService {
     private final TrackRepository trackRepository;
 
     @Transactional
-    public TrackResDto upsert(TrackReqDto dto) {
-        Track track = trackRepository.findBySpotifyId(dto.getSpotifyId())
+    public Track upsert(TrackReqDto dto) {
+        return trackRepository.findBySpotifyId(dto.getSpotifyId())
                 .orElseGet(() -> trackRepository.save(
                         Track.builder()
                                 .spotifyId(dto.getSpotifyId())
@@ -28,7 +27,5 @@ public class TrackService {
                                 .durationMs(dto.getDurationMs())
                                 .build()
                 ));
-
-        return TrackResDto.from(track);
     }
 }
