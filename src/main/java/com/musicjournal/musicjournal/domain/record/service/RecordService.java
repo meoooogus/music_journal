@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class RecordService {
@@ -37,5 +40,17 @@ public class RecordService {
         );
 
         return RecordResDto.from(record);
+    }
+
+    public List<RecordResDto> getRecords(LocalDate date, CustomUserDetails userDetails) {
+        User user = userDetails.getUser();
+
+        List<Record> records = (date == null)
+                ? recordRepository.findByUser(user)
+                : recordRepository.findByUserAndRecordedDate(user, date);
+
+        return records.stream()
+                .map(RecordResDto::from)    // Record 리스트의 모든 객체에 from 적용
+                .toList();
     }
 }
