@@ -35,4 +35,13 @@ public class RecordController {
     ) {
         return ResponseEntity.ok(recordService.getRecords(date, userDetails));
     }
+
+    // 단건 조회
+    @GetMapping("/{recordId}")
+    public ResponseEntity<RecordResDto> getRecord(
+            @PathVariable Long recordId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(recordService.getRecord(recordId, userDetails));
+    }
 }
