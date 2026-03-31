@@ -8,6 +8,7 @@ import com.musicjournal.musicjournal.domain.record.entity.Record;
 import com.musicjournal.musicjournal.domain.record.entity.RecordRepository;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
 import com.musicjournal.musicjournal.domain.track.entity.TrackRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,5 +53,16 @@ public class RecordService {
         return records.stream()
                 .map(RecordResDto::from)    // Record 리스트의 모든 객체에 from 적용
                 .toList();
+    }
+
+    public RecordResDto getRecord(Long recordId, CustomUserDetails userDetails) {
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기록입니다."));
+
+        if (!record.getUser().equals(userDetails.getUser())) {
+            throw new AccessDeniedException("본인의 기록만 조회할 수 있습니다");
+        }
+
+        return RecordResDto.from(record);
     }
 }
