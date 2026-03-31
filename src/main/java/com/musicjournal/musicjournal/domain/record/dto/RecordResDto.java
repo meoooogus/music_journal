@@ -28,6 +28,7 @@ public class RecordResDto {
         Track track = record.getTrack();
 
         return RecordResDto.builder()
+                .recordId(record.getRecordId())
                 .comment(record.getComment())
                 .recordedDate(record.getRecordedDate())
                 .trackTitle(track.getTitle())
