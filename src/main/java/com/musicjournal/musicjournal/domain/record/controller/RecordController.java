@@ -3,6 +3,7 @@ package com.musicjournal.musicjournal.domain.record.controller;
 import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
 import com.musicjournal.musicjournal.domain.record.dto.RecordReqDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordResDto;
+import com.musicjournal.musicjournal.domain.record.dto.RecordUpdateReqDto;
 import com.musicjournal.musicjournal.domain.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,5 +44,14 @@ public class RecordController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recordService.getRecord(recordId, userDetails));
+    }
+
+    @PutMapping("/{recordId}")
+    public ResponseEntity<RecordResDto> updateRecord(
+            @PathVariable Long recordId,
+            @RequestBody RecordUpdateReqDto dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(recordService.updateRecord(recordId, dto, userDetails));
     }
 }
