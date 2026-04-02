@@ -54,4 +54,13 @@ public class RecordController {
     ) {
         return ResponseEntity.ok(recordService.updateRecord(recordId, dto, userDetails));
     }
+
+    @DeleteMapping("/{recordId}")
+    public ResponseEntity<Void> deleteRecord(
+            @PathVariable Long recordId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        recordService.deleteRecord(recordId, userDetails);
+        return ResponseEntity.noContent().build();  // body없이 204 리턴
+    }
 }
