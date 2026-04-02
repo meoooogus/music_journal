@@ -91,4 +91,15 @@ public class RecordService {
 
         return RecordResDto.from(record);
     }
+
+    @Transactional
+    public void deleteRecord(Long recordId, CustomUserDetails userDetails) {
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 기록입니다."));
+        if (!record.getUser().equals(userDetails.getUser())) {
+            throw new NoSuchElementException("존재하지 않는 기록입니다.");
+        }
+
+        recordRepository.delete(record);
+    }
 }
