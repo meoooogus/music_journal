@@ -1,5 +1,7 @@
 package com.musicjournal.musicjournal.security.jwt;
 
+import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
+import com.musicjournal.musicjournal.domain.auth.service.CustomUserDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.io.Decoders;
@@ -21,6 +23,7 @@ import java.util.List;
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
+    private final CustomUserDetailsService customUserDetailsService;
 
     // secret-key를 Base64 디코딩 후 HMAC-SHA256 서명 키로 변환
     private SecretKey getSigningKey() {
@@ -71,11 +74,12 @@ public class JwtTokenProvider {
     // jwt토큰을 이용해 Security 전용 인증 객체 생성
     public Authentication getAuthentication(String token) {
         String email = getEmail(token);
-
-         return new UsernamePasswordAuthenticationToken(
-                email,
+        // DB에서 유저 로드 — principal을 CustomUserDetails로 세팅해야 @AuthenticationPrincipal이 동작함
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(email);
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                userDetails.getAuthorities()
         );
     }
 

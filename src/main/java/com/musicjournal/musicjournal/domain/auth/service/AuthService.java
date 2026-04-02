@@ -9,7 +9,7 @@ import com.musicjournal.musicjournal.domain.auth.entity.User;
 import com.musicjournal.musicjournal.domain.auth.entity.UserRepository;
 import com.musicjournal.musicjournal.security.jwt.JwtProperties;
 import com.musicjournal.musicjournal.security.jwt.JwtTokenProvider;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

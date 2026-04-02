@@ -1,0 +1,105 @@
+package com.musicjournal.musicjournal.domain.record.service;
+
+import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
+import com.musicjournal.musicjournal.domain.auth.entity.User;
+import com.musicjournal.musicjournal.domain.record.dto.RecordReqDto;
+import com.musicjournal.musicjournal.domain.record.dto.RecordResDto;
+import com.musicjournal.musicjournal.domain.record.dto.RecordUpdateReqDto;
+import com.musicjournal.musicjournal.domain.record.entity.Record;
+import com.musicjournal.musicjournal.domain.record.entity.RecordRepository;
+import com.musicjournal.musicjournal.domain.track.entity.Track;
+import com.musicjournal.musicjournal.domain.track.service.TrackService;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+@Service
+@RequiredArgsConstructor
+public class RecordService {
+
+    private final RecordRepository recordRepository;
+    private final TrackService trackService;
+
+    @Transactional
+    public RecordResDto createRecord(RecordReqDto dto, CustomUserDetails userDetails) {
+        // TrackService를 통해 upsert — 레이어 원칙 준수
+        Track track = trackService.upsert(dto.getTrack());
+
+        // 현재 로그인 유저 조회
+        User user = userDetails.getUser();
+
+        Record record = recordRepository.save(
+                Record.builder()
+                        .user(user)
+                        .track(track)
+                        .recordedDate(dto.getRecordedDate())
+                        .comment(dto.getComment())
+                        .build()
+        );
+
+        return RecordResDto.from(record);
+    }
+
+    @Transactional
+    public RecordResDto updateRecord(Long recordId, RecordUpdateReqDto dto, CustomUserDetails userDetails) {
+        // 없으면 404
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 기록입니다."));
+
+        if (!record.getUser().equals(userDetails.getUser())) {
+            throw new NoSuchElementException("존재하지 않는 기록입니다.");
+        } // 타인의 기록에 대해서 record 자체를 숨김
+
+        if (record.getCreatedAt().plusDays(7).isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("작성 후 7일이 지난 기록은 수정할 수 없습니다");
+        }
+
+        Track track = trackService.upsert(dto.getTrack());
+
+        record.update(track, dto.getRecordedDate(), dto.getComment());
+
+        //Transactional에서는 존재하는 entity에 대해서, 종료 후 자동으로 UPDATE 쿼리를 날려서 명시적 save() 불필요
+
+        return RecordResDto.from(record);
+    }
+
+    public List<RecordResDto> getRecords(LocalDate date, CustomUserDetails userDetails) {
+        User user = userDetails.getUser();
+
+        List<Record> records = (date == null)
+                ? recordRepository.findByUser(user)
+                : recordRepository.findByUserAndRecordedDate(user, date);
+
+        return records.stream()
+                .map(RecordResDto::from)    // Record 리스트의 모든 객체에 from 적용
+                .toList();
+    }
+
+    public RecordResDto getRecord(Long recordId, CustomUserDetails userDetails) {
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기록입니다."));
+
+        if (!record.getUser().equals(userDetails.getUser())) {
+            throw new AccessDeniedException("본인의 기록만 조회할 수 있습니다");
+        }
+
+        return RecordResDto.from(record);
+    }
+
+    @Transactional
+    public void deleteRecord(Long recordId, CustomUserDetails userDetails) {
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 기록입니다."));
+        if (!record.getUser().equals(userDetails.getUser())) {
+            throw new NoSuchElementException("존재하지 않는 기록입니다.");
+        }
+
+        recordRepository.delete(record);
+    }
+}

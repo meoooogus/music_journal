@@ -1,17 +1,16 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
+    url: jdbc:mysql://localhost:3306/musicjournal?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
 
 jwt:
   secret-key: ${JWT_SECRET}   # 환경변수 설정 필요
@@ -19,3 +18,9 @@ jwt:
     access-token: 900000      # 15min (ms)
     refresh-token: 604800000  # 7days (ms)
   issuer: musicjournal
+
+spotify:
+  client-id: ${SPOTIFY_CLIENT_ID}
+  client-secret: ${SPOTIFY_CLIENT_SECRET}
+  token-url: https://accounts.spotify.com/api/token
+  api-base-url: https://api.spotify.com/v1
