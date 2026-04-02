@@ -43,4 +43,10 @@ public class Record {
 
     // 코멘트 없이 기록만 남길 수 있도록
     private String comment;
+
+    public void update(Track track, LocalDate recordedDate, String comment) {
+        this.track = track;
+        this.recordedDate = recordedDate;
+        this.comment = comment;
+    }
 }

@@ -4,6 +4,7 @@ import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
 import com.musicjournal.musicjournal.domain.auth.entity.User;
 import com.musicjournal.musicjournal.domain.record.dto.RecordReqDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordResDto;
+import com.musicjournal.musicjournal.domain.record.dto.RecordUpdateReqDto;
 import com.musicjournal.musicjournal.domain.record.entity.Record;
 import com.musicjournal.musicjournal.domain.record.entity.RecordRepository;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
@@ -14,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +42,29 @@ public class RecordService {
                         .comment(dto.getComment())
                         .build()
         );
+
+        return RecordResDto.from(record);
+    }
+
+    @Transactional
+    public RecordResDto updateRecord(Long recordId, RecordUpdateReqDto dto, CustomUserDetails userDetails) {
+        // 없으면 404
+        Record record = recordRepository.findById(recordId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 기록입니다."));
+
+        if (!record.getUser().equals(userDetails.getUser())) {
+            throw new NoSuchElementException("존재하지 않는 기록입니다.");
+        } // 타인의 기록에 대해서 record 자체를 숨김
+
+        if (record.getCreatedAt().plusDays(7).isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("작성 후 7일이 지난 기록은 수정할 수 없습니다");
+        }
+
+        Track track = trackService.upsert(dto.getTrack());
+
+        record.update(track, dto.getRecordedDate(), dto.getComment());
+
+        //Transactional에서는 존재하는 entity에 대해서, 종료 후 자동으로 UPDATE 쿼리를 날려서 명시적 save() 불필요
 
         return RecordResDto.from(record);
     }
