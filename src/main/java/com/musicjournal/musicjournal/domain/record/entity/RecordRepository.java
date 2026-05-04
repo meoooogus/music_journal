@@ -25,10 +25,6 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     @Query("SELECT r.track.artistName, r.track.artistId, COUNT(r) FROM Record r WHERE r.user = :user GROUP BY r.track.artistName, r.track.artistId ORDER BY COUNT(r) DESC LIMIT :limit")
     List<Object[]> findTopArtistsByUser(@Param("user") User user, @Param("limit") int limit);
 
-    // 트랙별 기록 수
-    @Query("SELECT r.track.title, r.track.spotifyId, r.track.artworkUrl, COUNT (r) FROM Record r WHERE r.user = :user GROUP BY r.track.spotifyId, r.track.title, r.track.artworkUrl ORDER BY COUNT(r) DESC LIMIT :limit")
-    List<Object[]> findTopTracksByUser(@Param("user") User user, @Param("limit") int limit);
-
     // 앨범별 기록 수
     @Query("SELECT r.track.albumId, r.track.albumName, r.track.artworkUrl, COUNT (r) FROM Record r WHERE r.user = :user GROUP BY r.track.albumId, r.track.albumName, r.track.artworkUrl ORDER BY COUNT(r) DESC LIMIT :limit")
     List<Object[]> findTopAlbumByUser(@Param("user") User user, @Param("limit") int limit);
