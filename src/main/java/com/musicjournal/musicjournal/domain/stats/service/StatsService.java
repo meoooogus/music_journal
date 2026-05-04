@@ -35,19 +35,19 @@ public class StatsService {
         List<StatsResDto.ArtistStatDto> topArtists = recordRepository
                 .findTopArtistsByUser(user, TOP_N).stream()
                 .map(row -> StatsResDto.ArtistStatDto.builder()
-                        .artistName((String) row[0])
-                        .artistId((String) row[1])
-                        .count((Long) row[2])
+                        .artistName(row.getArtistName())
+                        .artistId(row.getArtistId())
+                        .count(row.getCount())
                         .build()
                 ).toList();
 
         List<StatsResDto.AlbumStatDto> topAlbums = recordRepository
                 .findTopAlbumByUser(user, TOP_N).stream()
                 .map(row -> StatsResDto.AlbumStatDto.builder()
-                        .albumId((String) row[0])
-                        .albumName((String) row[1])
-                        .artworkUrl((String) row[2])
-                        .count((Long) row[3])
+                        .albumId(row.getAlbumId())
+                        .albumName(row.getAlbumName())
+                        .artworkUrl(row.getArtworkUrl())
+                        .count(row.getCount())
                         .build()
                 ).toList();
 

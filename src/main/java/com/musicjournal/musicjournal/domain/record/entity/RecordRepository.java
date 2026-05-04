@@ -1,6 +1,7 @@
 package com.musicjournal.musicjournal.domain.record.entity;
 
 import com.musicjournal.musicjournal.domain.auth.entity.User;
+import com.musicjournal.musicjournal.domain.stats.dto.StatsProjections;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,11 +26,11 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     long countByUserAndYearMonth(@Param("user") User user, @Param("year") int year, @Param("month") int month);
 
     // 아티스트별 기록 수
-    @Query("SELECT r.track.artistName, r.track.artistId, COUNT(r) FROM Record r WHERE r.user = :user GROUP BY r.track.artistName, r.track.artistId ORDER BY COUNT(r) DESC LIMIT :limit")
-    List<Object[]> findTopArtistsByUser(@Param("user") User user, @Param("limit") int limit);
+    @Query("SELECT r.track.artistName AS artistName, r.track.artistId AS artistId, COUNT(r) AS count FROM Record r WHERE r.user = :user GROUP BY r.track.artistName, r.track.artistId ORDER BY COUNT(r) DESC LIMIT :limit")
+    List<StatsProjections.ArtistStatProjection> findTopArtistsByUser(@Param("user") User user, @Param("limit") int limit);
 
     // 앨범별 기록 수
-    @Query("SELECT r.track.albumId, r.track.albumName, r.track.artworkUrl, COUNT (r) FROM Record r WHERE r.user = :user GROUP BY r.track.albumId, r.track.albumName, r.track.artworkUrl ORDER BY COUNT(r) DESC LIMIT :limit")
-    List<Object[]> findTopAlbumByUser(@Param("user") User user, @Param("limit") int limit);
+    @Query("SELECT r.track.albumId AS albumId, r.track.albumName AS albumName, r.track.artworkUrl AS artworkUrl, COUNT(r) AS count FROM Record r WHERE r.user = :user GROUP BY r.track.albumId, r.track.albumName, r.track.artworkUrl ORDER BY COUNT(r) DESC LIMIT :limit")
+    List<StatsProjections.AlbumStatProjection> findTopAlbumByUser(@Param("user") User user, @Param("limit") int limit);
 
 }
