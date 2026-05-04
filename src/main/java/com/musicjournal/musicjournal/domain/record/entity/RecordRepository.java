@@ -17,6 +17,9 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     // 전체 목록 조회
     List<Record> findByUser(User user);
 
+    // 전체 기록 수
+    long countByUser(User user);
+
     // 이번 달 기록 수
     @Query("SELECT COUNT(r) FROM Record r WHERE r.user = :user AND YEAR(r.recordedDate) = :year AND MONTH(r.recordedDate) = :month")
     long countByUserAndYearMonth(@Param("user") User user, @Param("year") int year, @Param("month") int month);
