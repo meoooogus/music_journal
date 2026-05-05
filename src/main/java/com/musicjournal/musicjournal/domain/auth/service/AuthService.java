@@ -7,6 +7,8 @@ import com.musicjournal.musicjournal.domain.auth.entity.RefreshToken;
 import com.musicjournal.musicjournal.domain.auth.entity.RefreshTokenRepository;
 import com.musicjournal.musicjournal.domain.auth.entity.User;
 import com.musicjournal.musicjournal.domain.auth.entity.UserRepository;
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import com.musicjournal.musicjournal.security.jwt.JwtProperties;
 import com.musicjournal.musicjournal.security.jwt.JwtTokenProvider;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +30,7 @@ public class AuthService {
     @Transactional
     public void signUp(SignupReqDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         String hashedPassword = passwordEncoder.encode(dto.getPassword());
@@ -46,11 +48,11 @@ public class AuthService {
     public LoginResDto login(LoginReqDto dto) {
         // 1. email로 user 조회
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 2. password 검증
         if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
 
         // 3. access token, refresh token 생성
@@ -83,17 +85,17 @@ public class AuthService {
     public LoginResDto refresh(String refreshToken) {
         //1. 서명/만료 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new RuntimeException("유효하지 않은 refresh token입니다.");
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         String email = jwtTokenProvider.getEmail(refreshToken);
 
         //2. DB 저장된 토큰과 일치 여부 확인 - 탈취된 토큰 차단
         RefreshToken stored = refreshTokenRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("refresh token이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         if (!stored.getToken().equals(refreshToken)) {
-            throw new RuntimeException("refresh token이 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         //3. 새로운 AccessToken 발급

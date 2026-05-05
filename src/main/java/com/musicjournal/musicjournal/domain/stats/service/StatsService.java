@@ -4,8 +4,9 @@ import com.musicjournal.musicjournal.domain.auth.entity.User;
 import com.musicjournal.musicjournal.domain.auth.entity.UserRepository;
 import com.musicjournal.musicjournal.domain.record.entity.RecordRepository;
 import com.musicjournal.musicjournal.domain.stats.dto.StatsResDto;
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ public class StatsService {
 
     public StatsResDto getStats(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         LocalDate now = LocalDate.now();
 
