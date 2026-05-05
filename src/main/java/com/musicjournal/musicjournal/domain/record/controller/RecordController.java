@@ -5,6 +5,7 @@ import com.musicjournal.musicjournal.domain.record.dto.RecordReqDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordResDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordUpdateReqDto;
 import com.musicjournal.musicjournal.domain.record.service.RecordService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,7 +23,7 @@ public class RecordController {
 
     @PostMapping
     public ResponseEntity<RecordResDto> record(
-            @RequestBody RecordReqDto dto,
+            @Valid @RequestBody RecordReqDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recordService.createRecord(dto, userDetails));
@@ -49,7 +50,7 @@ public class RecordController {
     @PutMapping("/{recordId}")
     public ResponseEntity<RecordResDto> updateRecord(
             @PathVariable Long recordId,
-            @RequestBody RecordUpdateReqDto dto,
+            @Valid @RequestBody RecordUpdateReqDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recordService.updateRecord(recordId, dto, userDetails));
