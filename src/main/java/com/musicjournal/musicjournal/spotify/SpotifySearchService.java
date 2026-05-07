@@ -1,5 +1,6 @@
 package com.musicjournal.musicjournal.spotify;
 
+import com.musicjournal.musicjournal.domain.album.dto.AlbumResDto;
 import com.musicjournal.musicjournal.domain.track.dto.TrackResDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -20,13 +21,13 @@ public class SpotifySearchService {
     private final SpotifyTokenService spotifyTokenService;
     private final RestTemplate restTemplate;
 
-    public List<TrackResDto> search(String query) {
+    public List<Map<String, Object>> fetchItems(String query, String type) {
         String token = spotifyTokenService.getAccessToken();
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
 
-        String url = spotifyProperties.getApiBaseUrl() + "/search?q=" + query + "&type=track&limit=10";
+        String url = spotifyProperties.getApiBaseUrl() + "/search?q=" + query + "&type=" + type + "&limit=10";
 
         ResponseEntity<Map> response = restTemplate.exchange(
                 url,
@@ -37,16 +38,22 @@ public class SpotifySearchService {
 
         // 응답에서 tracks.items 추출
         Map<String, Object> body = response.getBody();
+        Map<String, Object> results = (Map<String, Object>) body.get(type + "s");
+        return (List<Map<String, Object>>) results.get("items");
+    }
 
-        Map<String, Object> tracks = (Map<String, Object>) body.get("tracks");
-        List<Map<String, Object>> items = (List<Map<String, Object>>) tracks.get("items");
-
-        return items.stream()
-                .map(this::mapToDto)
+    public List<TrackResDto> searchTracks(String query) {
+        return fetchItems(query, "track").stream()
+                .map(this::mapToTrackDto)
+                .toList();
+    }
+    public List<AlbumResDto> searchAlbums(String query) {
+        return fetchItems(query, "album").stream()
+                .map(this::mapToAlbumDto)
                 .toList();
     }
 
-    private TrackResDto mapToDto(Map<String, Object> item) {
+    private TrackResDto mapToTrackDto(Map<String, Object> item) {
         // artist 배열에서 첫 번째 아티스트 추출
         List<Map<String, Object>> artists = (List<Map<String, Object>>) item.get("artists");
         Map<String, Object> artist = artists.get(0);
@@ -64,6 +71,23 @@ public class SpotifySearchService {
                 .albumId((String) album.get("id"))
                 .artworkUrl(images.isEmpty() ? null : (String) images.get(0).get("url"))
                 .durationMs((Integer) item.get("duration_ms"))
+                .build();
+    }
+
+    private AlbumResDto mapToAlbumDto(Map<String, Object> item) {
+        // artist 배열에서 첫 번째 아티스트 추출
+        List<Map<String, Object>> artists = (List<Map<String, Object>>) item.get("artists");
+        Map<String, Object> artist = artists.get(0);
+        List<Map<String, Object>> images = (List<Map<String, Object>>) item.get("images");
+
+        return AlbumResDto.builder()
+                .spotifyAlbumId((String) item.get("id"))
+                .albumName((String) item.get("name"))
+                .artistName((String) artist.get("name"))
+                .artistId((String) artist.get("id"))
+                .artworkUrl(images.isEmpty() ? null : (String) images.get(0).get("url"))
+                .releaseDate((String) item.get("release_date"))
+                .totalTracks((Integer) item.get("total_tracks"))
                 .build();
     }
 
