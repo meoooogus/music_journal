@@ -16,6 +16,7 @@ public class CustomUserDetails implements UserDetails {
     // 추가 정보 접근자 — SecurityContext에서 꺼낼 때 DB 재조회 없이 사용
     public Long getUserId() { return user.getUserId(); }
     public String getRealUsername() { return user.getUsername(); }
+    public User getUser() { return user; }
 
     // --- UserDetails 위임 메서드 ---
 
