@@ -13,8 +13,8 @@ public enum ErrorCode {
     //로그인
     USER_NOT_FOUND(404, "USER_NOT_FOUND", "존재하지 않는 유저입니다."),
     INVALID_PASSWORD(401, "INVALID_PASSWORD", "비밀번호가 일치하지 않습니다."),
-    INVALID_REFRESH_TOKEN(401, "INVALID_REFRESH_TOKEN", "유효하지 않은 refresh 토큰입니다."),
-    REFRESH_TOKEN_NOT_FOUND(401, "REFRESH_TOKEN_NOT_FOUND", "refresh 토큰이 존재하지 않습니다."),
+    INVALID_REFRESH_TOKEN(401, "INVALID_REFRESH_TOKEN", "유효하지 않은 refresh token입니다."),
+    REFRESH_TOKEN_NOT_FOUND(401, "REFRESH_TOKEN_NOT_FOUND", "refresh token이 존재하지 않습니다."),
 
     //기록 관리
     RECORD_NOT_FOUND(404, "RECORD_NOT_FOUND", "존재하지 않는 기록입니다."),
