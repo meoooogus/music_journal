@@ -54,9 +54,15 @@ public class AlbumReview {
     @Builder.Default    // null이 아닌 빈 리스트로 초기화
     private List<AlbumRecommendation> recommendations = new ArrayList<>();
 
-    // 리뷰 수정 시 평점·평론 갱신 (추천 앨범은 AlbumRecommendation에서 별도 처리)
+    // 리뷰 수정 시 평점·평론 갱신
     public void update(Double rating, String content) {
         this.rating = rating;
         this.content = content;
+    }
+
+    // 추천 앨범 교체 (기존 전체 삭제 후 새 리스트 저장)
+    public void updateRecommendations(List<AlbumRecommendation> newRecommendations) {
+        this.recommendations.clear();
+        this.recommendations.addAll(newRecommendations);
     }
 }
