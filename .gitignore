@@ -39,3 +39,7 @@ out/
 ### macOS ###
 .DS_Store
 **/.DS_Store
+
+### Local ###
+postman/
+study-notes.md
