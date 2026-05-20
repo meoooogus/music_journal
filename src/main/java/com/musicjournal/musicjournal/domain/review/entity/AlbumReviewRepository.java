@@ -15,4 +15,7 @@ public interface AlbumReviewRepository extends JpaRepository<AlbumReview, Long> 
 
     @Query("SELECT DISTINCT r FROM AlbumReview r LEFT JOIN FETCH r.recommendations WHERE r.user = :user AND r.album.spotifyAlbumId = :spotifyAlbumId")
     Optional<AlbumReview> findMyReview(@Param("user") User user, @Param("spotifyAlbumId") String spotifyAlbumId);
+
+    @Query("SELECT r FROM AlbumReview r JOIN FETCH r.album WHERE r.user = :user ORDER BY r.createdAt DESC")
+    List<AlbumReview> findByUserOrderByCreatedAtDesc(@Param("user") User user);     // 내림차순
 }
