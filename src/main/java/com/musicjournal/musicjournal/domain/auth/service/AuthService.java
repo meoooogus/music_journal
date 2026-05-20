@@ -33,6 +33,11 @@ public class AuthService {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
+        // username 중복 체크
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+
         String hashedPassword = passwordEncoder.encode(dto.getPassword());
 
         User user = User.builder()

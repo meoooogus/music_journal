@@ -9,6 +9,7 @@ public enum ErrorCode {
 
     //회원가입
     EMAIL_ALREADY_EXISTS(409, "EMAIL_ALREADY_EXISTS", "이미 존재하는 이메일입니다."),
+    USERNAME_ALREADY_EXISTS(409, "USERNAME_ALREADY_EXISTS", "이미 존재하는 사용자명입니다."),
 
     //로그인
     USER_NOT_FOUND(404, "USER_NOT_FOUND", "존재하지 않는 유저입니다."),
