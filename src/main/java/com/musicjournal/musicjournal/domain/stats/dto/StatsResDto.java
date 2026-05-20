@@ -14,6 +14,7 @@ public class StatsResDto {
 
     private List<ArtistStatDto> topArtists;
     private List<AlbumStatDto> topAlbums;
+    private List<TopRatedReviewDto> topRatedReviews; // 평점 높은 순 내 평론
 
     @Getter
     @Builder
@@ -30,5 +31,15 @@ public class StatsResDto {
         private String albumId;
         private String artworkUrl;
         private long count;
+    }
+
+    @Getter
+    @Builder
+    public static class TopRatedReviewDto {
+        private String spotifyAlbumId;
+        private String albumName;
+        private String artistName;
+        private String artworkUrl;
+        private Double rating;
     }
 }

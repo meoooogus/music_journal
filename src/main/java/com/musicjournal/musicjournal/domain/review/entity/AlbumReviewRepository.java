@@ -1,6 +1,7 @@
 package com.musicjournal.musicjournal.domain.review.entity;
 
 import com.musicjournal.musicjournal.domain.auth.entity.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,7 @@ public interface AlbumReviewRepository extends JpaRepository<AlbumReview, Long> 
 
     @Query("SELECT r FROM AlbumReview r JOIN FETCH r.album WHERE r.user = :user ORDER BY r.createdAt DESC")
     List<AlbumReview> findByUserOrderByCreatedAtDesc(@Param("user") User user);     // 내림차순
+
+    @Query("SELECT r FROM AlbumReview r JOIN FETCH r.album WHERE r.user = :user ORDER BY r.rating DESC")
+    List<AlbumReview> findTopRatedByUser(@Param("user") User user, Pageable pageable);
 }
