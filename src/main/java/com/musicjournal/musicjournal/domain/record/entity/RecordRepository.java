@@ -25,6 +25,10 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     @Query("SELECT COUNT(r) FROM Record r WHERE r.user = :user AND YEAR(r.recordedDate) = :year AND MONTH(r.recordedDate) = :month")
     long countByUserAndYearMonth(@Param("user") User user, @Param("year") int year, @Param("month") int month);
 
+    // 월별 기록 조회
+    @Query("SELECT r FROM Record r WHERE r.user = :user AND YEAR(r.recordedDate) = :year AND MONTH(r.recordedDate) = :month ORDER BY r.recordedDate ASC")
+    List<Record> findByUserAndYearMonth(@Param("user") User user, @Param("year") int year, @Param("month") int month);
+
     // 아티스트별 기록 수
     @Query("SELECT r.track.artistName AS artistName, r.track.artistId AS artistId, COUNT(r) AS count FROM Record r WHERE r.user = :user GROUP BY r.track.artistName, r.track.artistId ORDER BY COUNT(r) DESC LIMIT :limit")
     List<StatsProjections.ArtistStatProjection> findTopArtistsByUser(@Param("user") User user, @Param("limit") int limit);

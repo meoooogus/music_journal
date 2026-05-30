@@ -33,9 +33,11 @@ public class RecordController {
     @GetMapping
     public ResponseEntity<List<RecordResDto>> getRecords(
             @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.ok(recordService.getRecords(date, userDetails));
+        return ResponseEntity.ok(recordService.getRecords(date, year, month, userDetails));
     }
 
     // 단건 조회

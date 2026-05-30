@@ -69,15 +69,21 @@ public class RecordService {
         return RecordResDto.from(record);
     }
 
-    public List<RecordResDto> getRecords(LocalDate date, CustomUserDetails userDetails) {
+    public List<RecordResDto> getRecords(LocalDate date, Integer year, Integer month, CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
-        List<Record> records = (date == null)
-                ? recordRepository.findByUser(user)
-                : recordRepository.findByUserAndRecordedDate(user, date);
+        List<Record> records;
+
+        if (date != null) {
+            records = recordRepository.findByUserAndRecordedDate(user, date);
+        } else if (year != null && month != null) {
+            records = recordRepository.findByUserAndYearMonth(user, year, month);
+        } else {
+            records = recordRepository.findByUser(user);
+        }
 
         return records.stream()
-                .map(RecordResDto::from)    // Record 리스트의 모든 객체에 from 적용
+                .map(RecordResDto::from)
                 .toList();
     }
 
