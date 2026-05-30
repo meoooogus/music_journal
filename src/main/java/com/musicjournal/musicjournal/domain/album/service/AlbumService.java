@@ -1,10 +1,14 @@
 package com.musicjournal.musicjournal.domain.album.service;
 
+import com.musicjournal.musicjournal.domain.album.dto.AlbumDetailResDto;
 import com.musicjournal.musicjournal.domain.album.dto.AlbumReqDto;
 import com.musicjournal.musicjournal.domain.album.dto.TrendingResDto;
 import com.musicjournal.musicjournal.domain.album.entity.Album;
 import com.musicjournal.musicjournal.domain.album.entity.AlbumRepository;
+import com.musicjournal.musicjournal.domain.review.dto.AlbumReviewResDto;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
+import com.musicjournal.musicjournal.spotify.SpotifyApiService;
+import com.musicjournal.musicjournal.spotify.dto.SpotifyAlbumResDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +23,7 @@ import java.util.List;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final AlbumReviewRepository albumReviewRepository;
+    private final SpotifyApiService spotifyApiService;
 
     @Transactional
     public Album upsert(String spotifyAlbumId, AlbumReqDto dto) {
@@ -35,6 +40,40 @@ public class AlbumService {
                                 .totalTracks(dto.getTotalTracks())
                                 .build()
                 ));
+    }
+
+    // Spotify API에서 앨범 + 트랙 조회, DB에 앨범 있으면 리뷰 집계도 포함
+    @Transactional(readOnly = true)
+    public AlbumDetailResDto getAlbumDetail(String spotifyAlbumId) {
+        // 1. Spotify API로 앨범 메타 + 트랙 조회
+        SpotifyAlbumResDto spotify = spotifyApiService.getAlbumDetail(spotifyAlbumId);
+
+        // 2. DB에 앨범이 있으면 리뷰 데이터 조회
+        Double avgRating = null;
+        Long reviewCount = null;
+        List<AlbumReviewResDto> reviews = List.of();
+
+        if (albumRepository.findBySpotifyAlbumId(spotifyAlbumId).isPresent()) {
+            avgRating = albumReviewRepository.findAvgRatingBySpotifyAlbumId(spotifyAlbumId);
+            reviewCount = albumReviewRepository.countBySpotifyAlbumId(spotifyAlbumId);
+            reviews = albumReviewRepository.findReviewsBySpotifyAlbumId(spotifyAlbumId).stream()
+                    .map(AlbumReviewResDto::from)
+                    .toList();
+        }
+
+        return AlbumDetailResDto.builder()
+                .spotifyAlbumId(spotify.getSpotifyAlbumId())
+                .albumName(spotify.getAlbumName())
+                .artistName(spotify.getArtistName())
+                .artworkUrl(spotify.getArtworkUrl())
+                .releaseDate(spotify.getReleaseDate())
+                .totalTracks(spotify.getTotalTracks())
+                .spotifyUrl(spotify.getSpotifyUrl())
+                .avgRating(avgRating)
+                .reviewCount(reviewCount)
+                .reviews(reviews)
+                .tracks(spotify.getTracks())
+                .build();
     }
 
     @Transactional(readOnly = true)

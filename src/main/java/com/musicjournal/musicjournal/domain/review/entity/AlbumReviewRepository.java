@@ -24,6 +24,14 @@ public interface AlbumReviewRepository extends JpaRepository<AlbumReview, Long> 
     @Query("SELECT r FROM AlbumReview r JOIN FETCH r.album WHERE r.user = :user ORDER BY r.rating DESC")
     List<AlbumReview> findTopRatedByUser(@Param("user") User user, Pageable pageable);
 
+    // 앨범별 평균 평점
+    @Query("SELECT AVG(r.rating) FROM AlbumReview r WHERE r.album.spotifyAlbumId = :spotifyAlbumId")
+    Double findAvgRatingBySpotifyAlbumId(@Param("spotifyAlbumId") String spotifyAlbumId);
+
+    // 앨범별 리뷰 수
+    @Query("SELECT COUNT(r) FROM AlbumReview r WHERE r.album.spotifyAlbumId = :spotifyAlbumId")
+    Long countBySpotifyAlbumId(@Param("spotifyAlbumId") String spotifyAlbumId);
+
     // 이번 달 리뷰 수 TOP N
     @Query("SELECT r.album.spotifyAlbumId as spotifyAlbumId, r.album.albumName as albumName, " +
            "r.album.artistName as artistName, r.album.artworkUrl as artworkUrl, COUNT(r) as reviewCount " +
