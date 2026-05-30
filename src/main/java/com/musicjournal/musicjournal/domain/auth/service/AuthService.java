@@ -87,6 +87,11 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
+    public void logout(String email) {
+        refreshTokenRepository.deleteByEmail(email);
+    }   // SELECT -> DELETE 로 나가므로 트랜잭션으로
+
     public LoginResDto refresh(String refreshToken) {
         //1. 서명/만료 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {

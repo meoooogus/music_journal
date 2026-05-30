@@ -33,7 +33,8 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // H2 console iframe 허용
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/h2-console/**").permitAll() // 인증 없이 접근 가능
+                        .requestMatchers("/auth/signup", "/auth/login", "/auth/refresh").permitAll() // 인증 없이 접근 가능
+                        .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) ; // JWT 검증을 Security 필터 앞에 삽입
