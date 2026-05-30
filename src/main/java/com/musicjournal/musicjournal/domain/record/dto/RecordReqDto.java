@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.musicjournal.musicjournal.domain.record.entity.Weather;
+
 import java.time.LocalDate;
 
 @Getter
@@ -23,4 +25,6 @@ public class RecordReqDto {
     private LocalDate recordedDate;
 
     private String comment;     // 코멘트 없이도 기록 가능
+
+    private Weather weather;
 }

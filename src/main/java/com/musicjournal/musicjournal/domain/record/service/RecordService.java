@@ -40,6 +40,7 @@ public class RecordService {
                         .track(track)
                         .recordedDate(dto.getRecordedDate())
                         .comment(dto.getComment())
+                        .weather(dto.getWeather())
                         .build()
         );
 
@@ -62,7 +63,7 @@ public class RecordService {
 
         Track track = trackService.upsert(dto.getTrack());
 
-        record.update(track, dto.getRecordedDate(), dto.getComment());
+        record.update(track, dto.getRecordedDate(), dto.getComment(), dto.getWeather());
 
         //Transactional에서는 존재하는 entity에 대해서, 종료 후 자동으로 UPDATE 쿼리를 날려서 명시적 save() 불필요
 

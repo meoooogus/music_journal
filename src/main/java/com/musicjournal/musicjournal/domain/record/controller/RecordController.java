@@ -1,6 +1,7 @@
 package com.musicjournal.musicjournal.domain.record.controller;
 
 import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
+import com.musicjournal.musicjournal.domain.record.entity.Weather;
 import com.musicjournal.musicjournal.domain.record.dto.RecordReqDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordResDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordUpdateReqDto;
@@ -20,6 +21,11 @@ import java.util.List;
 public class RecordController {
 
     private final RecordService recordService;
+
+    @GetMapping("/weather-types")
+    public ResponseEntity<Weather[]> getWeatherTypes() {
+        return ResponseEntity.ok(Weather.values());
+    }
 
     @PostMapping
     public ResponseEntity<RecordResDto> record(

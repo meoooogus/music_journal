@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.musicjournal.musicjournal.domain.record.entity.Weather;
+
 import java.time.LocalDate;
 
 @Getter
@@ -22,4 +24,6 @@ public class RecordUpdateReqDto {
     private LocalDate recordedDate;
 
     private String comment;     // null이면 코멘트 삭제
+
+    private Weather weather;
 } // 일단은 update와 create 분리
