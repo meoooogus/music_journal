@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class SpotifySearchService {
+public class SpotifyApiService {
 
     private final SpotifyProperties spotifyProperties;
     private final SpotifyTokenService spotifyTokenService;
