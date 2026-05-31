@@ -22,6 +22,16 @@ public enum ErrorCode {
     RECORD_EDIT_EXPIRED(403, "RECORD_EDIT_EXPIRED", "작성 후 7일이 지난 기록은 수정할 수 없습니다."),
     RECORD_ACCESS_DENIED(403, "RECORD_ACCESS_DENIED", "본인의 기록만 접근할 수 있습니다."),
 
+    //앨범 리뷰
+    ALBUM_NOT_FOUND(404, "ALBUM_NOT_FOUND", "존재하지 않는 앨범입니다."),
+    REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "존재하지 않는 리뷰입니다."),
+
+    //검색
+    UNSUPPORTED_SEARCH_TYPE(400, "UNSUPPORTED_SEARCH_TYPE", "지원하지 않는 검색 유형입니다."),
+
+    //외부 API
+    EXTERNAL_API_ERROR(502, "EXTERNAL_API_ERROR", "외부 API 호출 중 오류가 발생했습니다."),
+
     //공통
     INVALID_INPUT(400, "INVALID_INPUT", "입력값을 확인해주세요.");
 

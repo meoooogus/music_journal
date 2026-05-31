@@ -1,5 +1,7 @@
 package com.musicjournal.musicjournal.spotify;
 
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +22,7 @@ public class SearchController {
         return switch (type) {
             case "track" -> ResponseEntity.ok(spotifyApiService.searchTracks(q));
             case "album" -> ResponseEntity.ok(spotifyApiService.searchAlbums(q));
-            default -> ResponseEntity.badRequest().body("지원하지 않는 검색 유형입니다: " + type);
+            default -> throw new CustomException(ErrorCode.UNSUPPORTED_SEARCH_TYPE);
         };
     }
 }

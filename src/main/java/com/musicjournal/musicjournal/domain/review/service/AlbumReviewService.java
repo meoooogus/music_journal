@@ -11,6 +11,8 @@ import com.musicjournal.musicjournal.domain.review.dto.RecommendationReqDto;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumRecommendation;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReview;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +30,7 @@ public class AlbumReviewService {
     public AlbumReviewResDto upsertReview(String spotifyAlbumId, AlbumReviewReqDto dto, CustomUserDetails userDetails) {
         // 앨범 조회 - PUT /albums/{spotifyAlbumId} 선행
         Album album = albumRepository.findBySpotifyAlbumId(spotifyAlbumId)
-                .orElseThrow(() -> new RuntimeException("DB에 앨범이 존재하지 않습니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.ALBUM_NOT_FOUND));
 
         // 기존 리뷰 존재 시 수정, 없으면 신규 생성
         AlbumReview review = albumReviewRepository.findMyReview(userDetails.getUser(), spotifyAlbumId)
@@ -62,7 +64,7 @@ public class AlbumReviewService {
     @Transactional
     public void deleteReview(String spotifyAlbumId, CustomUserDetails userDetails) {
         AlbumReview review = albumReviewRepository.findMyReview(userDetails.getUser(), spotifyAlbumId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         albumReviewRepository.delete(review);
     }

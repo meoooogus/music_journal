@@ -2,20 +2,25 @@ package com.musicjournal.musicjournal.spotify;
 
 import com.musicjournal.musicjournal.domain.album.dto.AlbumResDto;
 import com.musicjournal.musicjournal.domain.track.dto.TrackResDto;
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import com.musicjournal.musicjournal.spotify.dto.AlbumTrackResDto;
 import com.musicjournal.musicjournal.spotify.dto.SpotifyAlbumResDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SpotifyApiService {
@@ -32,17 +37,22 @@ public class SpotifyApiService {
 
         String url = spotifyProperties.getApiBaseUrl() + "/search?q=" + query + "&type=" + type + "&limit=10";
 
-        ResponseEntity<Map> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                Map.class
-        );
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    Map.class
+            );
 
-        // 응답에서 tracks.items 추출
-        Map<String, Object> body = response.getBody();
-        Map<String, Object> results = (Map<String, Object>) body.get(type + "s");
-        return (List<Map<String, Object>>) results.get("items");
+            // 응답에서 tracks.items 추출
+            Map<String, Object> body = response.getBody();
+            Map<String, Object> results = (Map<String, Object>) body.get(type + "s");
+            return (List<Map<String, Object>>) results.get("items");
+        } catch (RestClientException e) {
+            log.error("Spotify 검색 API 호출 실패 - type: {}", type, e);
+            throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
+        }
     }
 
     public List<TrackResDto> searchTracks(String query) {
@@ -86,10 +96,14 @@ public class SpotifyApiService {
 
         String url = spotifyProperties.getApiBaseUrl() + "/albums/" + spotifyAlbumId;
 
-        ResponseEntity<Map> response = restTemplate.exchange(
-                url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
-
-        return mapToSpotifyAlbumDto(response.getBody());
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+            return mapToSpotifyAlbumDto(response.getBody());
+        } catch (RestClientException e) {
+            log.error("Spotify 앨범 상세 API 호출 실패 - albumId: {}", spotifyAlbumId, e);
+            throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
+        }
     }
 
     private SpotifyAlbumResDto mapToSpotifyAlbumDto(Map<String, Object> body) {

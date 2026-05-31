@@ -3,9 +3,12 @@ package com.musicjournal.musicjournal.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +39,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(new ErrorResDto(errorCode.getCode(), errorCode.getMessage(), validation));
+    }
+
+    // 잘못된 JSON 형식 요청
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResDto> handleMessageNotReadable(HttpMessageNotReadableException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResDto("INVALID_INPUT", "요청 본문을 읽을 수 없습니다."));
+    }
+
+    // 지원하지 않는 HTTP 메서드
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResDto> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ErrorResDto("METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다."));
+    }
+
+    // 경로 변수 타입 불일치 (e.g. Long에 문자열 전달)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResDto> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResDto("INVALID_INPUT", "요청 파라미터 타입이 올바르지 않습니다."));
     }
 
     // 예상치 못한 오류
