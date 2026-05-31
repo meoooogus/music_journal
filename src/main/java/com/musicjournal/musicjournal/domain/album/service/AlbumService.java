@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -78,12 +79,13 @@ public class AlbumService {
 
     @Transactional(readOnly = true)
     public TrendingResDto getTrending() {
-        LocalDate now = LocalDate.now();
-        Pageable top4 = PageRequest.of(0, 4);
+        // 최근 30일 기준 trending 조회
+        LocalDateTime since = LocalDate.now().minusDays(30).atStartOfDay();
+        Pageable topN = PageRequest.of(0, 5);
 
-        // 이번 달 리뷰 수 TOP 4
+        // 최근 30일 리뷰 수 TOP 5
         List<TrendingResDto.MostReviewedDto> mostReviewed = albumReviewRepository
-                .findMostReviewed(now.getYear(), now.getMonthValue(), top4).stream()
+                .findMostReviewed(since, topN).stream()
                 .map(p -> TrendingResDto.MostReviewedDto.builder()
                         .spotifyAlbumId(p.getSpotifyAlbumId())
                         .albumName(p.getAlbumName())
@@ -93,9 +95,9 @@ public class AlbumService {
                         .build())
                 .toList();
 
-        // 이번 달 평균 평점 TOP 4
+        // 최근 30일 평균 평점 TOP 5
         List<TrendingResDto.HighestRatedDto> highestRated = albumReviewRepository
-                .findHighestRated(now.getYear(), now.getMonthValue(), top4).stream()
+                .findHighestRated(since, topN).stream()
                 .map(p -> TrendingResDto.HighestRatedDto.builder()
                         .spotifyAlbumId(p.getSpotifyAlbumId())
                         .albumName(p.getAlbumName())
