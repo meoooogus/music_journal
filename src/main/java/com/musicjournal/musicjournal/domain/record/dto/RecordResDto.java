@@ -1,6 +1,7 @@
 package com.musicjournal.musicjournal.domain.record.dto;
 
 import com.musicjournal.musicjournal.domain.record.entity.Record;
+import com.musicjournal.musicjournal.domain.record.entity.Weather;
 import com.musicjournal.musicjournal.domain.track.dto.TrackResDto;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class RecordResDto {
     private String albumName;
     private String artistName;
     private String artworkUrl;
+    private Weather weather;
 
     public static RecordResDto from(Record record) {
         Track track = record.getTrack();
@@ -35,6 +37,7 @@ public class RecordResDto {
                 .albumName(track.getAlbumName())
                 .artistName(track.getArtistName())
                 .artworkUrl(track.getArtworkUrl())
+                .weather(record.getWeather())
                 .build();
     }
 }
