@@ -6,6 +6,7 @@ import com.musicjournal.musicjournal.domain.auth.entity.UserRepository;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileMyResDto;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileResDto;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileReviewResDto;
+import com.musicjournal.musicjournal.domain.follow.entity.FollowRepository;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
 import com.musicjournal.musicjournal.domain.stats.dto.StatsResDto;
 import com.musicjournal.musicjournal.domain.stats.service.StatsService;
@@ -25,6 +26,7 @@ public class ProfileService {
     private final AlbumReviewRepository albumReviewRepository;
     private final UserRepository userRepository;
     private final StatsService statsService;
+    private final FollowRepository followRepository;
 
     // 내 프로필 조회
     public ProfileMyResDto getMyProfile(CustomUserDetails userDetails) {
@@ -39,6 +41,8 @@ public class ProfileService {
 
         return ProfileMyResDto.builder()
                 .username(user.getUsername())
+                .followerCount(followRepository.countByFollowing(user))
+                .followingCount(followRepository.countByFollower(user))
                 .reviewCount(reviews.size())
                 .reviews(reviews)
                 .stat(stat)
@@ -56,6 +60,8 @@ public class ProfileService {
 
         return ProfileResDto.builder()
                 .username(username)
+                .followerCount(followRepository.countByFollowing(user))
+                .followingCount(followRepository.countByFollower(user))
                 .reviewCount(reviews.size())
                 .reviews(reviews)
                 .build();
