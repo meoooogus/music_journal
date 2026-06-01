@@ -9,10 +9,12 @@ import lombok.Getter;
 public class FollowUserResDto {
 
     private String username;
+    private String nickname;
 
     public static FollowUserResDto from(User user) {
         return FollowUserResDto.builder()
                 .username(user.getUsername())
+                .nickname(user.getNickname())
                 .build();
     }
 }

@@ -29,7 +29,7 @@ class AuthServiceTest {
 
     @Test
     void DB에_존재하지_않는_토큰으로_재발급_시도시_예외발생() {
-        SignupReqDto signup = new SignupReqDto("kdh031230", "qwer1234", "kdh");
+        SignupReqDto signup = new SignupReqDto("kdh031230", "qwer1234", "kdh", "대현");
         authService.signUp(signup);
 
         LoginResDto loginRes = authService.login(new LoginReqDto("kdh031230", "qwer1234"));

@@ -10,6 +10,7 @@ import java.util.List;
 public class ProfileResDto {
 
     private String username;
+    private String nickname;
     private long followerCount;
     private long followingCount;
     private int reviewCount;

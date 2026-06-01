@@ -22,4 +22,7 @@ public class SignupReqDto {
 
     @NotBlank(message = "사용할 이름을 입력해주세요.")
     private String username;
+
+    @NotBlank(message = "닉네임을 입력해주세요.")
+    private String nickname;
 }

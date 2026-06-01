@@ -26,6 +26,14 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
+    private String nickname;
+
+    // 프로필 수정
+    public void updateProfile(String username, String nickname) {
+        this.username = username;
+        this.nickname = nickname;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

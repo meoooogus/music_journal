@@ -6,6 +6,7 @@ import com.musicjournal.musicjournal.domain.auth.entity.UserRepository;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileMyResDto;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileResDto;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileReviewResDto;
+import com.musicjournal.musicjournal.domain.profile.dto.ProfileUpdateReqDto;
 import com.musicjournal.musicjournal.domain.follow.entity.FollowRepository;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
 import com.musicjournal.musicjournal.domain.stats.dto.StatsResDto;
@@ -41,12 +42,29 @@ public class ProfileService {
 
         return ProfileMyResDto.builder()
                 .username(user.getUsername())
+                .nickname(user.getNickname())
                 .followerCount(followRepository.countByFollowing(user))
                 .followingCount(followRepository.countByFollower(user))
                 .reviewCount(reviews.size())
                 .reviews(reviews)
                 .stat(stat)
                 .build();
+    }
+
+    // 프로필 수정
+    @Transactional
+    public void updateProfile(CustomUserDetails userDetails, ProfileUpdateReqDto dto) {
+        // Security Context의 User는 detached 상태 → managed 엔티티로 다시 조회해야 dirty checking 작동
+        User user = userRepository.findById(userDetails.getUser().getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // username 변경 시, 다른 유저가 이미 사용 중인지 체크
+        if (!user.getUsername().equals(dto.getUsername())
+                && userRepository.existsByUsername(dto.getUsername())) {
+            throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+
+        user.updateProfile(dto.getUsername(), dto.getNickname());
     }
 
     public ProfileResDto getProfile(String username) {
@@ -60,6 +78,7 @@ public class ProfileService {
 
         return ProfileResDto.builder()
                 .username(username)
+                .nickname(user.getNickname())
                 .followerCount(followRepository.countByFollowing(user))
                 .followingCount(followRepository.countByFollower(user))
                 .reviewCount(reviews.size())

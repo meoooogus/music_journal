@@ -44,6 +44,7 @@ public class AuthService {
                 .email(dto.getEmail())
                 .passwordHash(hashedPassword)
                 .username(dto.getUsername())
+                .nickname(dto.getNickname())
                 .build();
 
         userRepository.save(user);
