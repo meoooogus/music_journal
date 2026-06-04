@@ -1,10 +1,12 @@
 package com.musicjournal.musicjournal.domain.record.controller;
 
 import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
+import com.musicjournal.musicjournal.domain.record.entity.Weather;
 import com.musicjournal.musicjournal.domain.record.dto.RecordReqDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordResDto;
 import com.musicjournal.musicjournal.domain.record.dto.RecordUpdateReqDto;
 import com.musicjournal.musicjournal.domain.record.service.RecordService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,9 +22,14 @@ public class RecordController {
 
     private final RecordService recordService;
 
+    @GetMapping("/weather-types")
+    public ResponseEntity<Weather[]> getWeatherTypes() {
+        return ResponseEntity.ok(Weather.values());
+    }
+
     @PostMapping
     public ResponseEntity<RecordResDto> record(
-            @RequestBody RecordReqDto dto,
+            @Valid @RequestBody RecordReqDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recordService.createRecord(dto, userDetails));
@@ -32,9 +39,11 @@ public class RecordController {
     @GetMapping
     public ResponseEntity<List<RecordResDto>> getRecords(
             @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.ok(recordService.getRecords(date, userDetails));
+        return ResponseEntity.ok(recordService.getRecords(date, year, month, userDetails));
     }
 
     // 단건 조회
@@ -49,7 +58,7 @@ public class RecordController {
     @PutMapping("/{recordId}")
     public ResponseEntity<RecordResDto> updateRecord(
             @PathVariable Long recordId,
-            @RequestBody RecordUpdateReqDto dto,
+            @Valid @RequestBody RecordUpdateReqDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ResponseEntity.ok(recordService.updateRecord(recordId, dto, userDetails));

@@ -5,8 +5,11 @@ import com.musicjournal.musicjournal.domain.auth.dto.LoginResDto;
 import com.musicjournal.musicjournal.domain.auth.dto.RefreshReqDto;
 import com.musicjournal.musicjournal.domain.auth.dto.SignupReqDto;
 import com.musicjournal.musicjournal.domain.auth.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,14 +23,20 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@RequestBody SignupReqDto signupReqDto) {
+    public ResponseEntity<String> signUp(@Valid @RequestBody SignupReqDto signupReqDto) {
         authService.signUp(signupReqDto);
         return ResponseEntity.ok("회원가입 완료");
     } // HTTP 응답 직접 컨트롤하기 위한 객체
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResDto> login(@RequestBody LoginReqDto loginReqDto) {
+    public ResponseEntity<LoginResDto> login(@Valid @RequestBody LoginReqDto loginReqDto) {
         return ResponseEntity.ok(authService.login(loginReqDto));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails) {
+        authService.logout(userDetails.getUsername());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/refresh")

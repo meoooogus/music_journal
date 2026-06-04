@@ -1,15 +1,20 @@
 package com.musicjournal.musicjournal.spotify;
 
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SpotifyTokenService {
@@ -32,13 +37,17 @@ public class SpotifyTokenService {
         HttpEntity<LinkedMultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
         // Spotify token 엔드포인트 호출
-        ResponseEntity<Map> response = restTemplate.exchange(
-                spotifyProperties.getTokenUrl(),
-                HttpMethod.POST,
-                request,
-                Map.class
-        );
-
-        return (String) response.getBody().get("access_token");
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    spotifyProperties.getTokenUrl(),
+                    HttpMethod.POST,
+                    request,
+                    Map.class
+            );
+            return (String) response.getBody().get("access_token");
+        } catch (RestClientException e) {
+            log.error("Spotify 토큰 발급 실패", e);
+            throw new CustomException(ErrorCode.EXTERNAL_API_ERROR);
+        }
     }
 }

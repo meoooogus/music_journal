@@ -9,7 +9,8 @@ import com.musicjournal.musicjournal.domain.record.entity.Record;
 import com.musicjournal.musicjournal.domain.record.entity.RecordRepository;
 import com.musicjournal.musicjournal.domain.track.entity.Track;
 import com.musicjournal.musicjournal.domain.track.service.TrackService;
-import org.springframework.security.access.AccessDeniedException;
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +40,7 @@ public class RecordService {
                         .track(track)
                         .recordedDate(dto.getRecordedDate())
                         .comment(dto.getComment())
+                        .weather(dto.getWeather())
                         .build()
         );
 
@@ -50,43 +51,49 @@ public class RecordService {
     public RecordResDto updateRecord(Long recordId, RecordUpdateReqDto dto, CustomUserDetails userDetails) {
         // 없으면 404
         Record record = recordRepository.findById(recordId)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 기록입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         if (!record.getUser().equals(userDetails.getUser())) {
-            throw new NoSuchElementException("존재하지 않는 기록입니다.");
+            throw new CustomException(ErrorCode.RECORD_NOT_FOUND);
         } // 타인의 기록에 대해서 record 자체를 숨김
 
         if (record.getCreatedAt().plusDays(7).isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("작성 후 7일이 지난 기록은 수정할 수 없습니다");
+            throw new CustomException(ErrorCode.RECORD_EDIT_EXPIRED);
         }
 
         Track track = trackService.upsert(dto.getTrack());
 
-        record.update(track, dto.getRecordedDate(), dto.getComment());
+        record.update(track, dto.getRecordedDate(), dto.getComment(), dto.getWeather());
 
         //Transactional에서는 존재하는 entity에 대해서, 종료 후 자동으로 UPDATE 쿼리를 날려서 명시적 save() 불필요
 
         return RecordResDto.from(record);
     }
 
-    public List<RecordResDto> getRecords(LocalDate date, CustomUserDetails userDetails) {
+    public List<RecordResDto> getRecords(LocalDate date, Integer year, Integer month, CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
-        List<Record> records = (date == null)
-                ? recordRepository.findByUser(user)
-                : recordRepository.findByUserAndRecordedDate(user, date);
+        List<Record> records;
+
+        if (date != null) {
+            records = recordRepository.findByUserAndRecordedDate(user, date);
+        } else if (year != null && month != null) {
+            records = recordRepository.findByUserAndYearMonth(user, year, month);
+        } else {
+            records = recordRepository.findByUser(user);
+        }
 
         return records.stream()
-                .map(RecordResDto::from)    // Record 리스트의 모든 객체에 from 적용
+                .map(RecordResDto::from)
                 .toList();
     }
 
     public RecordResDto getRecord(Long recordId, CustomUserDetails userDetails) {
         Record record = recordRepository.findById(recordId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 기록입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         if (!record.getUser().equals(userDetails.getUser())) {
-            throw new AccessDeniedException("본인의 기록만 조회할 수 있습니다");
+            throw new CustomException(ErrorCode.RECORD_ACCESS_DENIED);
         }
 
         return RecordResDto.from(record);
@@ -95,9 +102,9 @@ public class RecordService {
     @Transactional
     public void deleteRecord(Long recordId, CustomUserDetails userDetails) {
         Record record = recordRepository.findById(recordId)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 기록입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
         if (!record.getUser().equals(userDetails.getUser())) {
-            throw new NoSuchElementException("존재하지 않는 기록입니다.");
+            throw new CustomException(ErrorCode.RECORD_NOT_FOUND);
         }
 
         recordRepository.delete(record);
