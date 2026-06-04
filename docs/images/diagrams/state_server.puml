@@ -1,0 +1,77 @@
+@startuml state_server
+title MusicJournal — Server (Spring Boot) Request-Processing State Machine
+
+' ── UML notation + orthogonal lines + wide spacing ──
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 90
+skinparam shadowing false
+skinparam dpi 150
+skinparam defaultFontName "Helvetica"
+skinparam state {
+  BackgroundColor #F7F7FA
+  BorderColor #5B5B66
+  ArrowColor #444
+  FontName "Helvetica"
+  FontSize 13
+}
+' Stateless server (SessionCreationPolicy.STATELESS): lifecycle of a single request
+' Transition labels follow UML: event [guard] / action
+
+[*] --> Idle
+
+state Idle as "Idle"
+Idle : waiting for request
+
+Idle --> TokenResolution : HTTP request / JwtFilter.doFilterInternal
+
+state TokenResolution as "TokenResolution"
+TokenResolution : extract Bearer token from Authorization header
+TokenResolution --> TokenValidation : [token present]
+TokenResolution --> Authorization   : [no token] / clear SecurityContext
+
+state TokenValidation as "TokenValidation"
+TokenValidation : do / validateToken (signature, expiry)
+TokenValidation --> Authenticated : [valid] / store auth in SecurityContext
+TokenValidation --> Authorization : [invalid]
+
+Authenticated --> Authorization
+
+state Authorization as "Authorization"
+Authorization : SecurityConfig.authorizeHttpRequests
+Authorization --> Processing   : [permitAll(/auth/**) or authenticated]
+Authorization --> Unauthorized : [protected & unauthenticated]
+Authorization --> Forbidden    : [authenticated & insufficient role]
+
+state Processing {
+  [*] --> Controller
+  Controller --> Service    : delegate request
+  Service    --> Repository : persistence access (JPA)
+  Repository --> Service    : return result
+  Service    --> Controller : return DTO
+}
+
+note right of Processing
+  /auth/** side effects on refresh_tokens:
+  · login   / store-update refresh token
+  · refresh / token rotation (invalidate old)
+  · logout  / delete refresh token
+  → only persistent auth state on the server
+end note
+
+Processing --> Responding    : [success] (2xx)
+Processing --> ErrorResponse : CustomException / GlobalExceptionHandler
+
+state Unauthorized  as "Unauthorized"
+Unauthorized : 401 — AuthenticationEntryPoint
+state Forbidden     as "Forbidden"
+Forbidden : 403 — AccessDeniedHandler
+state ErrorResponse as "ErrorResponse"
+ErrorResponse : ErrorResDto (4xx/5xx)
+
+Responding    --> [*]
+Unauthorized  --> [*]
+Forbidden     --> [*]
+ErrorResponse --> [*]
+
+@enduml

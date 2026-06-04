@@ -1,0 +1,64 @@
+@startuml state_client
+title MusicJournal — Client (Frontend) Session State Machine
+
+' ── UML notation + orthogonal lines + wide spacing ──
+skinparam linetype ortho
+skinparam nodesep 70
+skinparam ranksep 90
+skinparam shadowing false
+skinparam dpi 150
+skinparam defaultFontName "Helvetica"
+skinparam state {
+  BackgroundColor #F7F7FA
+  BorderColor #5B5B66
+  ArrowColor #444
+  FontName "Helvetica"
+  FontSize 13
+}
+' Transition labels follow UML: event [guard] / action
+
+[*] --> Initializing
+
+state Initializing as "Initializing"
+Initializing : entry / read localStorage token
+Initializing : do / GET /profiles/me (server-side validation)
+
+Initializing --> LoggedOut : [no token]
+Initializing --> LoggedIn  : me() [success]
+Initializing --> LoggedOut : me() [failure] / clearTokens
+
+state LoggedOut {
+  [*] --> LoginScreen
+  LoginScreen --> RegisterScreen : switch to register
+  RegisterScreen --> LoginScreen : switch to login
+}
+
+LoggedOut --> LoggedIn : login()/signup() [success] / saveTokens, me()
+
+state LoggedIn {
+  state MainTabs as "MainTabs"
+  MainTabs : Diary · Feed · Review · Profile
+  MainTabs : free switching via TabBar
+  [*] --> MainTabs
+
+  MainTabs --> DiaryDetail     : select record card
+  MainTabs --> AlbumReviewPage : select album
+  MainTabs --> OtherProfile    : select other user
+
+  DiaryDetail     --> MainTabs : back / onDeleted
+  AlbumReviewPage --> MainTabs : back
+  OtherProfile    --> MainTabs : back
+}
+
+LoggedIn --> TokenRefreshing : HTTP 401 [access expired]
+LoggedIn --> LoggedOut       : logout() / clearTokens
+
+state TokenRefreshing as "TokenRefreshing"
+TokenRefreshing : axios 401 interceptor
+TokenRefreshing : do / POST /auth/refresh
+TokenRefreshing : concurrent 401s → pendingQueue
+
+TokenRefreshing --> LoggedIn  : refresh [success] / saveTokens, retry original request
+TokenRefreshing --> LoggedOut : refresh [failure or no refreshToken] / clearTokens
+
+@enduml
