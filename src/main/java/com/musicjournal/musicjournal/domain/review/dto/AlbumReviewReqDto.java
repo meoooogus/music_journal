@@ -1,5 +1,6 @@
 package com.musicjournal.musicjournal.domain.review.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ public class AlbumReviewReqDto {
     private String content;
 
     // 추천 앨범: 최대 3개
+    @Valid
     @Size(max = 3)
     private List<RecommendationReqDto> recommendations = new ArrayList<>();
 }

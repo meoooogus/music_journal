@@ -1,5 +1,7 @@
 package com.musicjournal.musicjournal.domain.track.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TrackReqDto {
 
-    private String spotifyId;
-    private String title;
-    private String artistName;
-    private String artistId;
-    private String albumName;
-    private String albumId;
+    @NotBlank private String spotifyId;
+    @NotBlank private String title;
+    @NotBlank private String artistName;
+    @NotBlank private String artistId;
+    @NotBlank private String albumName;
+    @NotBlank private String albumId;
     private String artworkUrl;  // nullable
-    private Integer durationMs;
+    @NotNull private Integer durationMs;
 }

@@ -93,7 +93,7 @@ public class RecordService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         if (!record.getUser().equals(userDetails.getUser())) {
-            throw new CustomException(ErrorCode.RECORD_ACCESS_DENIED);
+            throw new CustomException(ErrorCode.RECORD_NOT_FOUND);
         }
 
         return RecordResDto.from(record);

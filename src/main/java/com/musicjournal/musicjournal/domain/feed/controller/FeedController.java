@@ -6,6 +6,7 @@ import com.musicjournal.musicjournal.domain.feed.service.FeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,15 +23,18 @@ public class FeedController {
     @GetMapping("/following")
     public ResponseEntity<Page<FeedResDto>> getFollowingFeed(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            Pageable pageable
+            @PageableDefault(size = 10) Pageable pageable
     ) {
-        return ResponseEntity.ok(feedService.getFollowingFeed(userDetails, pageable));
+        // size 상한 제한 — 과도한 요청 방지
+        Pageable safe = pageable.getPageSize() > 50 ? Pageable.ofSize(50).withPage(pageable.getPageNumber()) : pageable;
+        return ResponseEntity.ok(feedService.getFollowingFeed(userDetails, safe));
     }
 
     @GetMapping("/latest")
     public ResponseEntity<Page<FeedResDto>> getLatestFeed(
-            Pageable pageable
+            @PageableDefault(size = 10) Pageable pageable
     ) {
-        return ResponseEntity.ok(feedService.getLatestFeed(pageable));
+        Pageable safe = pageable.getPageSize() > 50 ? Pageable.ofSize(50).withPage(pageable.getPageNumber()) : pageable;
+        return ResponseEntity.ok(feedService.getLatestFeed(safe));
     }
 }

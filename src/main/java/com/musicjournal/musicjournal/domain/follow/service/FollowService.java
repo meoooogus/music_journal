@@ -9,6 +9,7 @@ import com.musicjournal.musicjournal.domain.follow.entity.FollowRepository;
 import com.musicjournal.musicjournal.exception.CustomException;
 import com.musicjournal.musicjournal.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,15 +35,19 @@ public class FollowService {
             throw new CustomException(ErrorCode.SELF_FOLLOW);
         }
 
-        // 중복 팔로우 방지
+        // 중복 팔로우 방지 — DB unique 제약으로 race condition도 안전하게 처리
         if (followRepository.existsByFollowerAndFollowing(follower, following)) {
             throw new CustomException(ErrorCode.ALREADY_FOLLOWING);
         }
 
-        followRepository.save(Follow.builder()
-                .follower(follower)
-                .following(following)
-                .build());
+        try {
+            followRepository.save(Follow.builder()
+                    .follower(follower)
+                    .following(following)
+                    .build());
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.ALREADY_FOLLOWING);
+        }
     }
 
     // 언팔로우
