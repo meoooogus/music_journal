@@ -1,13 +1,14 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { recordsApi, type TrackReq } from '../../api/records'
-import type { TrackSearchRes } from '../../api/albums'
+import { albumsApi, type TrackSearchRes } from '../../api/albums'
 import AlbumCover from '../../components/AlbumCover'
 import Button from '../../components/Button'
-import { CalendarIcon } from '../../components/Icon'
+import { CalendarIcon, SearchIcon, PlusIcon } from '../../components/Icon'
 import { Sheet, SheetContent } from '../../components/ui/sheet'
 import { Textarea } from '../../components/ui/textarea'
 import WeatherPicker, { type WeatherKey } from '../../components/WeatherPicker'
+import { useDebounce } from '../../hooks/useDebounce'
 
 // 날짜를 한국어 형식으로 포맷
 function formatKoreanDate(dateStr: string): string {
@@ -17,12 +18,12 @@ function formatKoreanDate(dateStr: string): string {
 }
 
 interface Props {
-  track: TrackSearchRes
+  track?: TrackSearchRes | null
   onClose: () => void
   onSaved: () => void
 }
 
-export default function AddRecordModal({ track, onClose, onSaved }: Props) {
+export default function AddRecordModal({ track: initialTrack, onClose, onSaved }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const [date, setDate] = useState(today)
   const dateRef = useRef<HTMLInputElement>(null)
@@ -30,18 +31,36 @@ export default function AddRecordModal({ track, onClose, onSaved }: Props) {
   const [weather, setWeather] = useState<WeatherKey | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // 트랙 선택 상태
+  const [selectedTrack, setSelectedTrack] = useState<TrackSearchRes | null>(initialTrack ?? null)
+  const [trackQuery, setTrackQuery] = useState('')
+  const [trackResults, setTrackResults] = useState<TrackSearchRes[]>([])
+  const [trackSearching, setTrackSearching] = useState(false)
+  const debouncedTrackQuery = useDebounce(trackQuery, 400)
+
+  // 트랙 검색
+  useEffect(() => {
+    if (!debouncedTrackQuery.trim()) { setTrackResults([]); return }
+    setTrackSearching(true)
+    albumsApi
+      .searchTracks(debouncedTrackQuery)
+      .then(setTrackResults)
+      .catch(console.error)
+      .finally(() => setTrackSearching(false))
+  }, [debouncedTrackQuery])
+
   const handleSave = async () => {
-    if (loading) return
+    if (loading || !selectedTrack) return
     setLoading(true)
     const trackReq: TrackReq = {
-      spotifyId: track.spotifyId,
-      title: track.title,
-      artistName: track.artistName,
-      artistId: track.artistId,
-      albumName: track.albumName,
-      albumId: track.albumId,
-      artworkUrl: track.artworkUrl,
-      durationMs: track.durationMs,
+      spotifyId: selectedTrack.spotifyId,
+      title: selectedTrack.title,
+      artistName: selectedTrack.artistName,
+      artistId: selectedTrack.artistId,
+      albumName: selectedTrack.albumName,
+      albumId: selectedTrack.albumId,
+      artworkUrl: selectedTrack.artworkUrl,
+      durationMs: selectedTrack.durationMs,
     }
     try {
       await recordsApi.create({
@@ -63,19 +82,91 @@ export default function AddRecordModal({ track, onClose, onSaved }: Props) {
       <SheetContent
         title="일기 추가"
         footer={
-          <Button full onClick={handleSave} disabled={loading}>
+          <Button full onClick={handleSave} disabled={!selectedTrack || loading}>
             {loading ? '저장 중...' : '기록하기'}
           </Button>
         }
       >
-        {/* 트랙 카드 */}
-        <div style={{ display: 'flex', gap: 12, padding: '4px 20px 16px', background: '#F7F7F8', borderRadius: 12, margin: '0 20px 20px' }}>
-          <AlbumCover artworkUrl={track.artworkUrl} albumName={track.albumName} size={52} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#17171A' }}>{track.title}</div>
-            <div style={{ fontSize: 12, color: 'rgba(55,56,60,0.55)', marginTop: 2 }}>{track.artistName}</div>
-            <div style={{ fontSize: 12, color: 'rgba(55,56,60,0.45)', marginTop: 1 }}>{track.albumName}</div>
-          </div>
+        {/* 트랙 선택 영역 */}
+        <div style={{ padding: '0 20px 16px' }}>
+          <label style={labelStyle}>트랙</label>
+          {selectedTrack ? (
+            // 선택된 트랙 표시
+            <div style={{
+              display: 'flex', gap: 12, alignItems: 'center',
+              padding: '10px 12px', background: '#F7F7F8', borderRadius: 12,
+            }}>
+              <AlbumCover artworkUrl={selectedTrack.artworkUrl} albumName={selectedTrack.albumName} size={44} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#17171A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {selectedTrack.title}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(55,56,60,0.55)', marginTop: 2 }}>
+                  {selectedTrack.artistName}
+                </div>
+              </div>
+              <button
+                onClick={() => { setSelectedTrack(null); setTrackQuery(''); setTrackResults([]) }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: 12, fontWeight: 600, color: 'rgba(55,56,60,0.5)',
+                  padding: '4px 8px', flexShrink: 0,
+                }}
+              >
+                변경
+              </button>
+            </div>
+          ) : (
+            // 트랙 검색
+            <div>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: '#F4F4F5', borderRadius: 10, padding: '0 12px', height: 40,
+              }}>
+                <SearchIcon size={15} color="rgba(55,56,60,0.4)" />
+                <input
+                  type="text"
+                  value={trackQuery}
+                  onChange={(e) => setTrackQuery(e.target.value)}
+                  placeholder="트랙 또는 아티스트 검색"
+                  style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 14, color: '#17171A' }}
+                />
+                {trackQuery && (
+                  <button onClick={() => setTrackQuery('')} style={{ background: 'none', border: 'none', color: 'rgba(55,56,60,0.4)', cursor: 'pointer', fontSize: 14 }}>✕</button>
+                )}
+              </div>
+              {/* 검색 결과 */}
+              {trackSearching && (
+                <div style={{ padding: '12px 0', textAlign: 'center', color: 'rgba(55,56,60,0.45)', fontSize: 13 }}>검색 중...</div>
+              )}
+              {!trackSearching && trackQuery.trim() && trackResults.length === 0 && (
+                <div style={{ padding: '12px 0', textAlign: 'center', color: 'rgba(55,56,60,0.45)', fontSize: 13 }}>결과 없음</div>
+              )}
+              {trackResults.length > 0 && (
+                <div style={{ maxHeight: 180, overflowY: 'auto', marginTop: 8 }}>
+                  {trackResults.map((t) => (
+                    <button
+                      key={t.spotifyId}
+                      onClick={() => { setSelectedTrack(t); setTrackQuery(''); setTrackResults([]) }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                        padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                      }}
+                    >
+                      <AlbumCover artworkUrl={t.artworkUrl} albumName={t.albumName} size={36} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#17171A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {t.title}
+                        </div>
+                        <div style={{ fontSize: 11, color: 'rgba(55,56,60,0.55)' }}>{t.artistName}</div>
+                      </div>
+                      <PlusIcon size={14} color="rgba(55,56,60,0.4)" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* 날짜 — 스타일된 버튼 + hidden native date picker */}

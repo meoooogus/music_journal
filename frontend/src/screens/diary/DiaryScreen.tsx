@@ -20,6 +20,7 @@ export default function DiaryScreen({ onOpenDetail }: Props) {
   const [searchResults, setSearchResults] = useState<TrackSearchRes[]>([])
   const [searching, setSearching] = useState(false)
   const [addTrack, setAddTrack] = useState<TrackSearchRes | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
   const [viewTab, setViewTab] = useState<ViewTab>('list')
   const debouncedQuery = useDebounce(query, 400)
 
@@ -43,7 +44,7 @@ export default function DiaryScreen({ onOpenDetail }: Props) {
   const showSearch = query.trim().length > 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
       {/* 헤더 */}
       <div style={{ padding: '8px 20px 16px' }}>
         <img src="/logo.png" alt="MJZ" style={{ height: 32, objectFit: 'contain', marginBottom: 4 }} />
@@ -94,7 +95,7 @@ export default function DiaryScreen({ onOpenDetail }: Props) {
           </div>
         ) : records.length === 0 ? (
           // 빈 상태
-          <EmptyState onSearch={() => document.querySelector<HTMLInputElement>('input[type="text"]')?.focus()} />
+          <EmptyState />
         ) : (
           <>
             {/* 리스트/캘린더 탭 */}
@@ -115,38 +116,38 @@ export default function DiaryScreen({ onOpenDetail }: Props) {
         )}
       </div>
 
-      {/* 기록 추가 모달 */}
-      {addTrack && (
+      {/* FAB — 일기 추가 버튼 */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        style={{
+          position: 'absolute', bottom: 16, right: 16,
+          width: 52, height: 52, borderRadius: 16,
+          background: '#17171A', border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+        }}
+      >
+        <PlusIcon size={24} color="#fff" />
+      </button>
+
+      {/* 기록 추가 모달 — FAB 또는 검색결과에서 열림 */}
+      {(showAddModal || addTrack) && (
         <AddRecordModal
           track={addTrack}
-          onClose={() => setAddTrack(null)}
-          onSaved={() => { setAddTrack(null); setQuery(''); loadRecords() }}
+          onClose={() => { setShowAddModal(false); setAddTrack(null) }}
+          onSaved={() => { setShowAddModal(false); setAddTrack(null); setQuery(''); loadRecords() }}
         />
       )}
     </div>
   )
 }
 
-function EmptyState({ onSearch }: { onSearch: () => void }) {
+function EmptyState() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 32px', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 32px', gap: 8 }}>
       <div style={{ fontSize: 36 }}>🎵</div>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 17, fontWeight: 600, color: '#17171A', letterSpacing: '-0.01em' }}>오늘은 무얼 들었나요?</div>
-        <div style={{ fontSize: 13, color: 'rgba(55,56,60,0.55)', marginTop: 6 }}>위 검색창에서 트랙을 찾아 기록을 남겨보세요</div>
-      </div>
-      <button
-        onClick={onSearch}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          padding: '10px 18px', borderRadius: 12,
-          background: '#17171A', color: '#fff', border: 'none',
-          fontSize: 14, fontWeight: 600, cursor: 'pointer',
-        }}
-      >
-        <PlusIcon size={16} color="#fff" />
-        첫 기록 남기기
-      </button>
+      <div style={{ fontSize: 17, fontWeight: 600, color: '#17171A', letterSpacing: '-0.01em' }}>오늘은 무얼 들었나요?</div>
+      <div style={{ fontSize: 13, color: 'rgba(55,56,60,0.55)' }}>+ 버튼을 눌러 첫 기록을 남겨보세요</div>
     </div>
   )
 }
