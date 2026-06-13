@@ -46,7 +46,11 @@ export default function WeatherPicker({ selected, onSelect }: Props) {
           <button
             key={opt.key}
             type="button"
-            onClick={() => onSelect(active ? null : opt.key)}
+            onClick={() => {
+              // iOS: 키보드가 올라와 있으면 터치 좌표 어긋남 방지 — blur + 선택을 같은 틱에서 처리
+              if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+              onSelect(active ? null : opt.key)
+            }}
             style={{
               display: 'flex', alignItems: 'center', gap: 4,
               padding: '6px 10px', borderRadius: 999, flexShrink: 0,

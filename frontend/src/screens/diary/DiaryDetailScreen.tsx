@@ -152,30 +152,30 @@ function EditDiaryModal({ record, onClose, onSaved }: { record: RecordRes; onClo
         <div style={{ padding: '0 20px 16px' }}>
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#37383C', marginBottom: 6 }}>날짜</label>
           <div style={{ position: 'relative' }}>
-            <button
-              type="button"
-              onClick={() => dateRef.current?.showPicker()}
-              style={{
-                width: '100%', height: 48, padding: '0 14px',
-                borderRadius: 10,
-                border: '1.5px solid rgba(112,115,124,0.22)',
-                background: '#F7F7F8',
-                color: '#17171A',
-                fontSize: 15, fontWeight: 500,
-                textAlign: 'left', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              }}
-            >
+            <div style={{
+              width: '100%', height: 48, padding: '0 14px',
+              borderRadius: 10,
+              border: '1.5px solid rgba(112,115,124,0.22)',
+              background: '#F7F7F8',
+              color: '#17171A',
+              fontSize: 15, fontWeight: 500,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              pointerEvents: 'none',
+            }}>
               {formatKoreanDate(date)}
               <CalendarIcon size={18} color="rgba(55,56,60,0.45)" />
-            </button>
+            </div>
             <input
               ref={dateRef}
               type="date"
               value={date}
               max={new Date().toISOString().slice(0, 10)}
-              onChange={(e) => setDate(e.target.value)}
-              style={{ position: 'absolute', opacity: 0, width: 0, height: 0, overflow: 'hidden' }}
+              onChange={(e) => e.target.value && setDate(e.target.value)}
+              style={{
+                position: 'absolute', inset: 0,
+                opacity: 0, width: '100%', height: '100%',
+                cursor: 'pointer',
+              }}
             />
           </div>
         </div>

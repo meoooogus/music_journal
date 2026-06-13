@@ -73,7 +73,7 @@ export default function DiaryScreen({ onOpenDetail }: Props) {
         </div>
       </div>
 
-      <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', paddingBottom: 76 }}>
         {showSearch ? (
           // 검색 결과
           <div>
@@ -85,12 +85,11 @@ export default function DiaryScreen({ onOpenDetail }: Props) {
                 검색 결과가 없어요
               </div>
             )}
-            {searchResults.map((track) => (
-              <TrackRow
-                key={track.spotifyId}
-                track={track}
-                onAdd={() => setAddTrack(track)}
-              />
+            {searchResults.map((track, i) => (
+              <div key={track.spotifyId}>
+                {i > 0 && <div style={{ height: 1, background: 'rgba(112,115,124,0.08)', margin: '0 16px' }} />}
+                <TrackRow track={track} onAdd={() => setAddTrack(track)} />
+              </div>
             ))}
           </div>
         ) : records.length === 0 ? (
