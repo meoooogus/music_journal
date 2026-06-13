@@ -40,6 +40,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/signup", "/auth/login", "/auth/refresh").permitAll() // 인증 없이 접근 가능
                         .requestMatchers("/h2-console/**").permitAll()
+                        // 프론트엔드 정적 리소스 — 인증 없이 접근 허용
+                        .requestMatchers("/", "/index.html", "/assets/**", "/*.png", "/*.jpg", "/*.ico", "/*.svg").permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .exceptionHandling(ex -> ex

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from './context/AuthContext'
 import TabBar from './components/TabBar'
@@ -27,13 +27,46 @@ export default function App() {
   const [viewingUsername, setViewingUsername] = useState<string | null>(null)
   const [feedTab, setFeedTab] = useState<FeedTab>('following')
 
+  // ── 브라우저 뒤로가기 지원 (History API) ──
+  const subPageRef = useRef(false)
+
+  // 서브 페이지 진입 시 히스토리 추가 (메인 → 서브 전환 시 1회만)
+  const enterSubPage = () => {
+    if (!subPageRef.current) {
+      window.history.pushState(null, '')
+      subPageRef.current = true
+    }
+  }
+
+  // 메인 탭으로 복귀 — 모든 서브 페이지 상태 초기화
+  const goBackToMain = useCallback(() => {
+    subPageRef.current = false
+    setViewingUsername(null)
+    setAlbumPage(null)
+    setDiaryDetail(null)
+  }, [])
+
+  // 브라우저 뒤로가기 이벤트 핸들링
+  useEffect(() => {
+    const handlePopState = () => goBackToMain()
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [goBackToMain])
+
   // sonner toast 헬퍼
   const showToast = (msg: string) => toast(msg)
 
   // 내 프로필이면 탭 전환, 다른 유저면 프로필 페이지 열기
   const openProfile = (u: string) => {
-    if (u === username) { setTab('profile'); setAlbumPage(null); setViewingUsername(null) }
-    else setViewingUsername(u)
+    if (u === username) {
+      setTab('profile')
+      if (subPageRef.current) window.history.back()
+      else { setAlbumPage(null); setViewingUsername(null) }
+    } else {
+      enterSubPage()
+      setViewingUsername(u)
+      setAlbumPage(null)
+    }
   }
 
   // 토큰 검증 완료 전 — 로그인/메인 화면 깜빡임 방지
@@ -59,7 +92,7 @@ export default function App() {
       <Shell>
         <ProfileScreen
           viewingUsername={viewingUsername}
-          onBack={() => setViewingUsername(null)}
+          onBack={() => window.history.back()}
           onOpenAlbum={(a) => { setViewingUsername(null); setAlbumPage(a) }}
           onOpenProfile={openProfile}
         />
@@ -73,7 +106,7 @@ export default function App() {
       <Shell>
         <AlbumReviewPage
           album={albumPage}
-          onBack={() => setAlbumPage(null)}
+          onBack={() => window.history.back()}
           onOpenAlbum={(a) => setAlbumPage(a)}
           onOpenProfile={(u) => { setAlbumPage(null); openProfile(u) }}
           showToast={showToast}
@@ -88,8 +121,8 @@ export default function App() {
       <Shell>
         <DiaryDetailScreen
           record={diaryDetail}
-          onBack={() => setDiaryDetail(null)}
-          onDeleted={() => { setDiaryDetail(null); setTab('diary') }}
+          onBack={() => window.history.back()}
+          onDeleted={() => { setTab('diary'); window.history.back() }}
           onUpdated={(updated) => setDiaryDetail(updated)}
           showToast={showToast}
         />
@@ -101,10 +134,10 @@ export default function App() {
   return (
     <Shell>
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {tab === 'diary'   && <DiaryScreen onOpenDetail={(r) => setDiaryDetail(r)} />}
-        {tab === 'feed'    && <FeedScreen onOpenAlbum={(a) => setAlbumPage(a)} onOpenProfile={openProfile} feedTab={feedTab} setFeedTab={setFeedTab} />}
-        {tab === 'review'  && <ReviewScreen onOpenAlbum={(a) => setAlbumPage(a)} />}
-        {tab === 'profile' && <ProfileScreen onOpenAlbum={(a) => setAlbumPage(a)} onOpenProfile={openProfile} />}
+        {tab === 'diary'   && <DiaryScreen onOpenDetail={(r) => { enterSubPage(); setDiaryDetail(r) }} />}
+        {tab === 'feed'    && <FeedScreen onOpenAlbum={(a) => { enterSubPage(); setAlbumPage(a) }} onOpenProfile={openProfile} feedTab={feedTab} setFeedTab={setFeedTab} />}
+        {tab === 'review'  && <ReviewScreen onOpenAlbum={(a) => { enterSubPage(); setAlbumPage(a) }} />}
+        {tab === 'profile' && <ProfileScreen onOpenAlbum={(a) => { enterSubPage(); setAlbumPage(a) }} onOpenProfile={openProfile} />}
       </div>
       <TabBar tab={tab} setTab={setTab} />
     </Shell>

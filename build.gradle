@@ -48,3 +48,30 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// ── Frontend build & bundle ──────────────────────────
+def frontendDir = "${projectDir}/frontend"
+
+tasks.register('npmInstall', Exec) {
+	workingDir frontendDir
+	executable 'bash'
+	args '-c', 'npm install'
+}
+
+tasks.register('frontendBuild', Exec) {
+	dependsOn 'npmInstall'
+	workingDir frontendDir
+	executable 'bash'
+	args '-c', 'npm run build'
+}
+
+// Vite 빌드 결과물을 Spring Boot static 리소스로 복사
+tasks.register('copyFrontend', Copy) {
+	dependsOn 'frontendBuild'
+	from "${frontendDir}/dist"
+	into layout.buildDirectory.dir("resources/main/static")
+}
+
+tasks.named('processResources') {
+	dependsOn 'copyFrontend'
+}
