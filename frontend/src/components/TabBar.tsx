@@ -35,7 +35,7 @@ export default function TabBar({ tab, setTab }: TabBarProps) {
           style={{
             flex: 1, display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
-            padding: '10px 0 6px', gap: 3, background: 'none', border: 'none',
+            padding: '12px 0 10px', gap: 3, background: 'none', border: 'none',
             cursor: 'pointer',
           }}
         >

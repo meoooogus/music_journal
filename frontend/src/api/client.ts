@@ -51,7 +51,7 @@ client.interceptors.response.use(
     if (!refreshToken) {
       // 리프레시 토큰 없음 → 로그아웃
       clearTokens()
-      window.location.href = '/login'
+      window.location.href = '/'
       return Promise.reject(error)
     }
 
@@ -69,7 +69,7 @@ client.interceptors.response.use(
       pendingQueue.forEach((p) => p.reject(refreshError))
       pendingQueue = []
       clearTokens()
-      window.location.href = '/login'
+      window.location.href = '/'
       return Promise.reject(refreshError)
     } finally {
       isRefreshing = false
