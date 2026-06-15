@@ -10,6 +10,8 @@ Spotify에서 트랙을 검색하고, 날짜별로 감상을 남기고, 앨범�
 ## 배포 주소
 
 > https://mjz-production.up.railway.app
+>
+> 서비스 이용을 위해 **회원가입**이 필요합니다.
 
 ## 주요 기능
 
