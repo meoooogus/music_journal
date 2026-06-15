@@ -1,7 +1,13 @@
+<p align="center">
+  <img src="frontend/public/logo-readme.jpg" alt="mjz logo" width="120" />
+</p>
+
 # mjz — Music Diary & Review
 
 나만의 음악 일기와 앨범 평론을 기록하는 서비스입니다.
 Spotify에서 트랙을 검색하고, 날짜별로 감상을 남기고, 앨범을 탐색하여 앨범 리뷰를 공유할 수 있습니다.
+
+## 배포 주소
 
 > https://mjz-production.up.railway.app
 
