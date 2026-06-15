@@ -24,6 +24,9 @@ export const authApi = {
   signup: (body: SignupReq) =>
     client.post<string>('/auth/signup', body).then((r) => r.data),
 
+  logout: () =>
+    client.post<void>('/auth/logout'),
+
   checkUsername: (value: string) =>
     client.get<{ available: boolean }>('/auth/check-username', { params: { value } }).then((r) => r.data),
 
