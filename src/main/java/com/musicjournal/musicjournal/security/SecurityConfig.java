@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // H2 console iframe 허용
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/signup", "/auth/login", "/auth/refresh").permitAll() // 인증 없이 접근 가능
+                        .requestMatchers("/auth/signup", "/auth/login", "/auth/refresh", "/auth/check-username", "/auth/check-email").permitAll() // 인증 없이 접근 가능
                         .requestMatchers("/h2-console/**").permitAll()
                         // 프론트엔드 정적 리소스 — 인증 없이 접근 허용
                         .requestMatchers("/", "/index.html", "/assets/**", "/*.png", "/*.jpg", "/*.ico", "/*.svg", "/manifest.json").permitAll()

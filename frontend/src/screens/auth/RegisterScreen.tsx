@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { authApi } from '../../api/auth'
 import { EyeIcon, EyeOffIcon, CheckIcon } from '../../components/Icon'
 import Button from '../../components/Button'
 
@@ -17,12 +18,55 @@ export default function RegisterScreen({ onSwitch }: Props) {
   const [serverError, setServerError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // 실시간 중복 확인 상태
+  const [usernameAvail, setUsernameAvail] = useState<boolean | null>(null)
+  const [emailAvail, setEmailAvail] = useState<boolean | null>(null)
+  const [checkingUsername, setCheckingUsername] = useState(false)
+  const [checkingEmail, setCheckingEmail] = useState(false)
+
   // 유효성 검사
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const usernameOk = /^[a-z0-9_]{3,20}$/.test(username)
   const nicknameOk = nickname.trim().length >= 1
   const passwordOk = password.length >= 8
   const canSubmit = emailOk && usernameOk && nicknameOk && passwordOk
+    && usernameAvail === true && emailAvail === true
+
+  // username 실시간 중복 확인 (debounce 400ms)
+  useEffect(() => {
+    setUsernameAvail(null)
+    if (!usernameOk) return
+    setCheckingUsername(true)
+    const timer = setTimeout(async () => {
+      try {
+        const { available } = await authApi.checkUsername(username)
+        setUsernameAvail(available)
+      } catch {
+        setUsernameAvail(null)
+      } finally {
+        setCheckingUsername(false)
+      }
+    }, 400)
+    return () => { clearTimeout(timer); setCheckingUsername(false) }
+  }, [username])
+
+  // email 실시간 중복 확인 (debounce 400ms)
+  useEffect(() => {
+    setEmailAvail(null)
+    if (!emailOk) return
+    setCheckingEmail(true)
+    const timer = setTimeout(async () => {
+      try {
+        const { available } = await authApi.checkEmail(email)
+        setEmailAvail(available)
+      } catch {
+        setEmailAvail(null)
+      } finally {
+        setCheckingEmail(false)
+      }
+    }, 400)
+    return () => { clearTimeout(timer); setCheckingEmail(false) }
+  }, [email])
 
   const handleSubmit = async () => {
     if (!canSubmit || loading) return
@@ -31,8 +75,8 @@ export default function RegisterScreen({ onSwitch }: Props) {
     try {
       await signup({ email, username, nickname, password })
     } catch (e: unknown) {
-      const msg = (e as { response?: { data?: string } })?.response?.data
-      setServerError(typeof msg === 'string' ? msg : '회원가입에 실패했습니다.')
+      const data = (e as { response?: { data?: { message?: string } } })?.response?.data
+      setServerError(data?.message ?? '회원가입에 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -64,8 +108,14 @@ export default function RegisterScreen({ onSwitch }: Props) {
           {/* 이메일 */}
           <Field
             label="이메일"
-            status={email ? (emailOk ? 'ok' : 'error') : 'idle'}
-            helper={email && !emailOk ? '올바른 이메일 형식을 입력해주세요.' : undefined}
+            status={!email ? 'idle' : !emailOk ? 'error' : emailAvail === true ? 'ok' : emailAvail === false ? 'error' : 'idle'}
+            helper={
+              !email ? undefined
+                : !emailOk ? '올바른 이메일 형식을 입력해주세요.'
+                : checkingEmail ? '확인 중...'
+                : emailAvail === false ? '이미 사용 중인 이메일입니다.'
+                : undefined
+            }
           >
             <input
               type="email"
@@ -73,17 +123,19 @@ export default function RegisterScreen({ onSwitch }: Props) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="이메일을 입력하세요"
               autoComplete="email"
-              style={inputStyle(email ? (emailOk ? 'ok' : 'error') : 'idle')}
+              style={inputStyle(!email ? 'idle' : !emailOk ? 'error' : emailAvail === true ? 'ok' : emailAvail === false ? 'error' : 'idle')}
             />
           </Field>
 
           {/* 아이디 */}
           <Field
             label="아이디"
-            status={username ? (usernameOk ? 'ok' : 'error') : 'idle'}
+            status={!username ? 'idle' : !usernameOk ? 'error' : usernameAvail === true ? 'ok' : usernameAvail === false ? 'error' : 'idle'}
             helper={
-              username && !usernameOk
-                ? '영문 소문자, 숫자, _ 조합 3–20자'
+              !username ? undefined
+                : !usernameOk ? '영문 소문자, 숫자, _ 조합 3–20자'
+                : checkingUsername ? '확인 중...'
+                : usernameAvail === false ? '이미 사용 중인 아이디입니다.'
                 : undefined
             }
           >
@@ -95,9 +147,9 @@ export default function RegisterScreen({ onSwitch }: Props) {
                 onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 placeholder="username"
                 autoComplete="username"
-                style={{ ...inputStyle(username ? (usernameOk ? 'ok' : 'error') : 'idle'), paddingLeft: 30 }}
+                style={{ ...inputStyle(!username ? 'idle' : !usernameOk ? 'error' : usernameAvail === true ? 'ok' : usernameAvail === false ? 'error' : 'idle'), paddingLeft: 30 }}
               />
-              {usernameOk && (
+              {usernameAvail === true && (
                 <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: '#00BF40' }}>
                   <CheckIcon size={16} color="#00BF40" />
                 </span>

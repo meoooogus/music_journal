@@ -27,6 +27,16 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtProperties jwtProperties;
 
+    // username 사용 가능 여부 확인
+    public boolean isUsernameAvailable(String username) {
+        return !userRepository.existsByUsername(username);
+    }
+
+    // email 사용 가능 여부 확인
+    public boolean isEmailAvailable(String email) {
+        return !userRepository.existsByEmail(email);
+    }
+
     @Transactional
     public void signUp(SignupReqDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
