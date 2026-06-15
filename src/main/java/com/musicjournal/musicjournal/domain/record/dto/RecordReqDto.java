@@ -18,6 +18,7 @@ import java.time.LocalDate;
 @Builder
 public class RecordReqDto {
 
+    @Valid
     @NotNull(message = "음원을 선택해주세요.")
     private TrackReqDto track;
 

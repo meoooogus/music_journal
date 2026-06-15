@@ -26,6 +26,11 @@ public enum ErrorCode {
     ALBUM_NOT_FOUND(404, "ALBUM_NOT_FOUND", "존재하지 않는 앨범입니다."),
     REVIEW_NOT_FOUND(404, "REVIEW_NOT_FOUND", "존재하지 않는 리뷰입니다."),
 
+    // 팔로우
+    SELF_FOLLOW(400, "SELF_FOLLOW", "자기 자신을 팔로우할 수 없습니다."),
+    ALREADY_FOLLOWING(409, "ALREADY_FOLLOWING", "이미 팔로우한 유저입니다."),
+    NOT_FOLLOWING(404, "NOT_FOLLOWING", "팔로우하지 않은 유저입니다."),
+
     //검색
     UNSUPPORTED_SEARCH_TYPE(400, "UNSUPPORTED_SEARCH_TYPE", "지원하지 않는 검색 유형입니다."),
 

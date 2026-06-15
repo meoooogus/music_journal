@@ -11,6 +11,9 @@ import java.util.List;
 public class ProfileMyResDto {
 
     private String username;
+    private String nickname;
+    private long followerCount;
+    private long followingCount;
     private int reviewCount;
     private List<ProfileReviewResDto> reviews;
     private StatsResDto stat;

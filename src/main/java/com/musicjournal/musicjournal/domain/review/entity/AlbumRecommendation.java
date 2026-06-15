@@ -20,7 +20,8 @@ public class AlbumRecommendation {
     @JoinColumn(name = "review_id", nullable = false)
     private AlbumReview review;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // 추천앨범은 항상 album 정보와 함께 사용되므로 EAGER
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "album_id", nullable = false)
     private Album album;
 }

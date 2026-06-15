@@ -1,0 +1,143 @@
+/* Preflight 제외 — 기존 inline styles와 충돌 방지 */
+@import "tailwindcss/utilities";
+
+/* shadcn/ui CSS variables */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+    --primary: 240 10% 10%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 10% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 240 10% 10%;
+    --radius: 0.75rem;
+  }
+}
+
+/* Wanted Design System Tokens — mjz 프로젝트 */
+
+:root {
+  /* Neutral */
+  --w-neutral-99: #FCFCFD;
+  --w-neutral-95: #F4F4F5;
+  --w-neutral-90: #DBDCDF;
+  --w-neutral-80: #C2C4C8;
+  --w-neutral-70: #AEB0B6;
+  --w-neutral-60: #989BA2;
+  --w-neutral-50: #878A93;
+  --w-neutral-40: #70737C;
+  --w-neutral-30: #505258;
+  --w-neutral-22: #37383C;
+  --w-neutral-20: #2E2F33;
+  --w-neutral-15: #1B1C1E;
+  --w-neutral-10: #17171A;
+
+  /* Background */
+  --w-bg-default:  #FFFFFF;
+  --w-bg-subtle:   #F7F7F8;
+  --w-bg-muted:    #F4F4F5;
+
+  /* Foreground */
+  --w-fg-strong:    #000000;
+  --w-fg-default:   #17171A;
+  --w-fg-secondary: #37383C;
+  --w-fg-muted:     rgba(46,47,51,0.88);
+  --w-fg-subtle:    rgba(55,56,60,0.61);
+  --w-fg-disabled:  #AEB0B6;
+  --w-fg-on-color:  #FFFFFF;
+
+  /* Borders */
+  --w-line-default: rgba(112,115,124,0.22);
+  --w-line-strong:  #DBDCDF;
+
+  /* Status */
+  --w-success:    #00BF40;
+  --w-success-bg: #F0FFF4;
+  --w-danger:     #FF4242;
+  --w-danger-bg:  #FFF5F5;
+
+  /* Shadows */
+  --w-shadow-1: 0 1px 2px rgba(23,23,23,0.06), 0 1px 3px rgba(23,23,23,0.07);
+  --w-shadow-2: 0 4px 8px rgba(23,23,23,0.07), 0 2px 4px rgba(23,23,23,0.06);
+  --w-shadow-3: 0 10px 24px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.06);
+  --w-shadow-4: 0 20px 48px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08);
+
+  /* Radii */
+  --w-radius-xs:   4px;
+  --w-radius-sm:   8px;
+  --w-radius-md:   12px;
+  --w-radius-lg:   16px;
+  --w-radius-xl:   24px;
+  --w-radius-pill: 999px;
+
+  /* Font */
+  --w-font-sans: "Pretendard JP", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* Global reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--w-font-sans);
+  color: var(--w-fg-default);
+  background: var(--w-bg-subtle);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, textarea, button, select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* 스크롤바 숨김 */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+/* Range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  background: transparent;
+  width: 100%;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--w-line-default);
+  border-radius: 999px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #17171A;
+  margin-top: -9px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  cursor: pointer;
+}

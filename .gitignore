@@ -40,6 +40,10 @@ out/
 .DS_Store
 **/.DS_Store
 
+### Frontend ###
+node_modules/
+frontend/dist/
+
 ### Local ###
 postman/
 study-notes.md
