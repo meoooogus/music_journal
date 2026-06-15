@@ -10,10 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+
+    // 실시간 username 중복 확인
+    @GetMapping("/check-username")
+    public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String value) {
+        return ResponseEntity.ok(Map.of("available", authService.isUsernameAvailable(value)));
+    }
+
+    // 실시간 email 중복 확인
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestParam String value) {
+        return ResponseEntity.ok(Map.of("available", authService.isEmailAvailable(value)));
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@Valid @RequestBody SignupReqDto signupReqDto) {

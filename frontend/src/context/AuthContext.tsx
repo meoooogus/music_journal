@@ -71,7 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await login({ email: body.email, password: body.password })
   }
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authApi.logout()
+    } catch {
+      // 서버 호출 실패해도 로컬 정리는 진행
+    }
     clearTokens()
     localStorage.removeItem('username')
     setIsLoggedIn(false)
