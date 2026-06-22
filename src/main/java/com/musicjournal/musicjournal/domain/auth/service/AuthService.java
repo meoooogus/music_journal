@@ -80,7 +80,7 @@ public class AuthService {
         ));
 
         // 4. refresh token 있으면 갱신, 없으면 신규 저장
-        refreshTokenRepository.findByEmail(user.getEmail())
+        refreshTokenRepository.findById(user.getEmail())
                 .ifPresentOrElse(
                         rt -> rt.updateToken(refreshToken, expiresAt),
                         () -> refreshTokenRepository.save(
@@ -100,9 +100,10 @@ public class AuthService {
 
     @Transactional
     public void logout(String email) {
-        refreshTokenRepository.deleteByEmail(email);
+        refreshTokenRepository.deleteById(email);
     }   // SELECT -> DELETE 로 나가므로 트랜잭션으로
 
+    @Transactional // dirty checking으로 refresh token rotation이 DB에 반영되려면 필수
     public LoginResDto refresh(String refreshToken) {
         //1. 서명/만료 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
@@ -112,7 +113,7 @@ public class AuthService {
         String email = jwtTokenProvider.getEmail(refreshToken);
 
         //2. DB 저장된 토큰과 일치 여부 확인 - 탈취된 토큰 차단
-        RefreshToken stored = refreshTokenRepository.findByEmail(email)
+        RefreshToken stored = refreshTokenRepository.findById(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
         if (!stored.getToken().equals(refreshToken)) {
