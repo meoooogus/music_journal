@@ -103,6 +103,7 @@ public class AuthService {
         refreshTokenRepository.deleteByEmail(email);
     }   // SELECT -> DELETE 로 나가므로 트랜잭션으로
 
+    @Transactional // dirty checking으로 refresh token rotation이 DB에 반영되려면 필수
     public LoginResDto refresh(String refreshToken) {
         //1. 서명/만료 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
