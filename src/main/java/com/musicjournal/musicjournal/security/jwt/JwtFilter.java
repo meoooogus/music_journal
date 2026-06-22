@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -31,13 +30,16 @@ public class JwtFilter extends OncePerRequestFilter { // 요청당 한번만 실
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = resolveToken(request); // 헤더에서 토큰 추출
 
-        // 토큰이 존재하고 유효한 경우에만 SecurityContext에 인증 정보(인증 객체) 저장
-        if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("인증 성공 - email: {}", authentication.getName());
-        } else if (StringUtils.hasText(token)) {
-            log.warn("토큰 검증 실패 - uri: {}", request.getRequestURI());
+        // 토큰 검증 + 인증 객체 생성을 한 번의 파싱으로 처리
+        if (StringUtils.hasText(token)) {
+            jwtTokenProvider.resolveAuthentication(token)
+                    .ifPresentOrElse(
+                            auth -> {
+                                SecurityContextHolder.getContext().setAuthentication(auth);
+                                log.debug("인증 성공 - email: {}", auth.getName());
+                            },
+                            () -> log.warn("토큰 검증 실패 - uri: {}", request.getRequestURI())
+                    );
         }
 
         filterChain.doFilter(request, response); // 다음 필터로 전달
