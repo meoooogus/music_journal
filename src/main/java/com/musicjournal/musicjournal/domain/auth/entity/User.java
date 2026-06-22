@@ -36,13 +36,15 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(userId, user.userId) && Objects.equals(email, user.email) && Objects.equals(passwordHash, user.passwordHash) && Objects.equals(username, user.username);
+        // PK만 비교 — mutable/민감 필드 제외, persist 전(null) 엔티티는 동일 객체만 같음
+        return userId != null && Objects.equals(userId, user.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, email, passwordHash, username);
+        return Objects.hashCode(userId);
     }
 }
