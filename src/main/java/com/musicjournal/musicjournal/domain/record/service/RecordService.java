@@ -70,6 +70,7 @@ public class RecordService {
         return RecordResDto.from(record);
     }
 
+    @Transactional(readOnly = true)
     public List<RecordResDto> getRecords(LocalDate date, Integer year, Integer month, CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
@@ -88,6 +89,7 @@ public class RecordService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public RecordResDto getRecord(Long recordId, CustomUserDetails userDetails) {
         Record record = recordRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
