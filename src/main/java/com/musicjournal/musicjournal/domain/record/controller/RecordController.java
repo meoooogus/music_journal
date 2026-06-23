@@ -8,6 +8,7 @@ import com.musicjournal.musicjournal.domain.record.dto.RecordUpdateReqDto;
 import com.musicjournal.musicjournal.domain.record.service.RecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class RecordController {
             @Valid @RequestBody RecordReqDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ResponseEntity.ok(recordService.createRecord(dto, userDetails));
+        return ResponseEntity.status(HttpStatus.CREATED).body(recordService.createRecord(dto, userDetails));
     }
 
     // 기록 전체 조회 / 날짜별 조회
