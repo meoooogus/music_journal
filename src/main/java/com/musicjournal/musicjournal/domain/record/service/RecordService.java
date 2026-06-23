@@ -68,11 +68,20 @@ public class RecordService {
     public List<RecordResDto> getRecords(LocalDate date, Integer year, Integer month, CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
+        // 잘못된 파라미터 조합 차단: date + year/month 동시, year/month 중 하나만
+        boolean hasDate = date != null;
+        boolean hasYearMonth = year != null && month != null;
+        boolean hasPartialYearMonth = (year != null) != (month != null);
+
+        if ((hasDate && (year != null || month != null)) || hasPartialYearMonth) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
         List<Record> records;
 
-        if (date != null) {
+        if (hasDate) {
             records = recordRepository.findByUserAndRecordedDate(user, date);
-        } else if (year != null && month != null) {
+        } else if (hasYearMonth) {
             records = recordRepository.findByUserAndYearMonth(user, year, month);
         } else {
             records = recordRepository.findByUser(user);
