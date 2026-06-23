@@ -1,6 +1,7 @@
 package com.musicjournal.musicjournal.domain.record.dto;
 
 import com.musicjournal.musicjournal.domain.track.dto.TrackReqDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 @Builder
 public class RecordUpdateReqDto {
 
+    @Valid
     @NotNull(message = "음원을 선택해주세요.")
     private TrackReqDto track;
 

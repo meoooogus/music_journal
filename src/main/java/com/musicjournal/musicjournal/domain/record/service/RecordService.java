@@ -49,13 +49,7 @@ public class RecordService {
 
     @Transactional
     public RecordResDto updateRecord(Long recordId, RecordUpdateReqDto dto, CustomUserDetails userDetails) {
-        // 없으면 404
-        Record record = recordRepository.findById(recordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
-
-        if (!record.getUser().equals(userDetails.getUser())) {
-            throw new CustomException(ErrorCode.RECORD_NOT_FOUND);
-        } // 타인의 기록에 대해서 record 자체를 숨김
+        Record record = findByIdAndValidateOwner(recordId, userDetails);
 
         if (record.getCreatedAt().plusDays(7).isBefore(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.RECORD_EDIT_EXPIRED);
@@ -70,14 +64,24 @@ public class RecordService {
         return RecordResDto.from(record);
     }
 
+    @Transactional(readOnly = true)
     public List<RecordResDto> getRecords(LocalDate date, Integer year, Integer month, CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
+        // 잘못된 파라미터 조합 차단: date + year/month 동시, year/month 중 하나만
+        boolean hasDate = date != null;
+        boolean hasYearMonth = year != null && month != null;
+        boolean hasPartialYearMonth = (year != null) != (month != null);
+
+        if ((hasDate && (year != null || month != null)) || hasPartialYearMonth) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
         List<Record> records;
 
-        if (date != null) {
+        if (hasDate) {
             records = recordRepository.findByUserAndRecordedDate(user, date);
-        } else if (year != null && month != null) {
+        } else if (hasYearMonth) {
             records = recordRepository.findByUserAndYearMonth(user, year, month);
         } else {
             records = recordRepository.findByUser(user);
@@ -88,25 +92,27 @@ public class RecordService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public RecordResDto getRecord(Long recordId, CustomUserDetails userDetails) {
-        Record record = recordRepository.findById(recordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
-
-        if (!record.getUser().equals(userDetails.getUser())) {
-            throw new CustomException(ErrorCode.RECORD_NOT_FOUND);
-        }
-
+        Record record = findByIdAndValidateOwner(recordId, userDetails);
         return RecordResDto.from(record);
     }
 
     @Transactional
     public void deleteRecord(Long recordId, CustomUserDetails userDetails) {
+        Record record = findByIdAndValidateOwner(recordId, userDetails);
+        recordRepository.delete(record);
+    }
+
+    // 조회 + 소유권 검증 — 본인의 record만 접근 가능, 타인의 record는 존재 자체를 숨김
+    private Record findByIdAndValidateOwner(Long recordId, CustomUserDetails userDetails) {
         Record record = recordRepository.findById(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+
         if (!record.getUser().equals(userDetails.getUser())) {
             throw new CustomException(ErrorCode.RECORD_NOT_FOUND);
         }
 
-        recordRepository.delete(record);
+        return record;
     }
 }
