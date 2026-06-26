@@ -40,4 +40,16 @@ public class Track {
     @Column(nullable = false)
     private Integer durationMs;
 
+    // Spotify 측 정보 동기화 — 변경 여부는 Hibernate dirty checking이 판단
+    public void update(String title, String artistName, String artistId,
+                       String artworkUrl, String albumName, String albumId, Integer durationMs) {
+        this.title = title;
+        this.artistName = artistName;
+        this.artistId = artistId;
+        this.artworkUrl = artworkUrl;
+        this.albumName = albumName;
+        this.albumId = albumId;
+        this.durationMs = durationMs;
+    }
+
 }
