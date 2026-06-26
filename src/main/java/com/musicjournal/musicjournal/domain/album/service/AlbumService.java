@@ -28,8 +28,13 @@ public class AlbumService {
 
     @Transactional
     public Album upsert(String spotifyAlbumId, AlbumReqDto dto) {
-        // spotifyAlbumId로 DB 조회 후 없으면 저장
         return albumRepository.findBySpotifyAlbumId(spotifyAlbumId)
+                .map(album -> {
+                    // 기존 앨범 — Spotify 최신 정보로 동기화 (dirty checking으로 자동 UPDATE)
+                    album.update(dto.getAlbumName(), dto.getArtistId(), dto.getArtistName(),
+                            dto.getArtworkUrl(), dto.getReleaseDate(), dto.getTotalTracks());
+                    return album;
+                })
                 .orElseGet(() -> albumRepository.save(
                         Album.builder()
                                 .albumName(dto.getAlbumName())
