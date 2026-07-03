@@ -5,7 +5,6 @@ import com.musicjournal.musicjournal.domain.album.dto.AlbumReqDto;
 import com.musicjournal.musicjournal.domain.album.dto.TrendingResDto;
 import com.musicjournal.musicjournal.domain.album.entity.Album;
 import com.musicjournal.musicjournal.domain.album.entity.AlbumRepository;
-import com.musicjournal.musicjournal.domain.review.dto.AlbumReviewResDto;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
 import com.musicjournal.musicjournal.spotify.SpotifyApiService;
 import com.musicjournal.musicjournal.spotify.dto.SpotifyAlbumResDto;
@@ -24,6 +23,7 @@ import java.util.List;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final AlbumReviewRepository albumReviewRepository;
+    private final AlbumDetailQueryService albumDetailQueryService;
     private final SpotifyApiService spotifyApiService;
 
     @Transactional
@@ -48,24 +48,14 @@ public class AlbumService {
                 ));
     }
 
-    // Spotify API에서 앨범 + 트랙 조회, DB에 앨범 있으면 리뷰 집계도 포함
-    @Transactional(readOnly = true)
+    // 외부 API 호출과 DB 조회를 트랜잭션 분리 — 커넥션 점유 최소화
     public AlbumDetailResDto getAlbumDetail(String spotifyAlbumId) {
-        // 1. Spotify API로 앨범 메타 + 트랙 조회
+        // 1. Spotify API — 트랜잭션 밖 (DB 커넥션 미사용)
         SpotifyAlbumResDto spotify = spotifyApiService.getAlbumDetail(spotifyAlbumId);
 
-        // 2. DB에 앨범이 있으면 리뷰 데이터 조회
-        Double avgRating = null;
-        Long reviewCount = null;
-        List<AlbumReviewResDto> reviews = List.of();
-
-        if (albumRepository.findBySpotifyAlbumId(spotifyAlbumId).isPresent()) {
-            avgRating = albumReviewRepository.findAvgRatingBySpotifyAlbumId(spotifyAlbumId);
-            reviewCount = albumReviewRepository.countBySpotifyAlbumId(spotifyAlbumId);
-            reviews = albumReviewRepository.findReviewsBySpotifyAlbumId(spotifyAlbumId).stream()
-                    .map(AlbumReviewResDto::from)
-                    .toList();
-        }
+        // 2. DB 리뷰 조회 — @Transactional(readOnly = true)로 일관된 스냅샷 보장
+        AlbumDetailQueryService.ReviewSummary summary =
+                albumDetailQueryService.getReviewSummary(spotifyAlbumId);
 
         return AlbumDetailResDto.builder()
                 .spotifyAlbumId(spotify.getSpotifyAlbumId())
@@ -75,9 +65,9 @@ public class AlbumService {
                 .releaseDate(spotify.getReleaseDate())
                 .totalTracks(spotify.getTotalTracks())
                 .spotifyUrl(spotify.getSpotifyUrl())
-                .avgRating(avgRating)
-                .reviewCount(reviewCount)
-                .reviews(reviews)
+                .avgRating(summary.getAvgRating())
+                .reviewCount(summary.getReviewCount())
+                .reviews(summary.getReviews())
                 .tracks(spotify.getTracks())
                 .build();
     }
