@@ -1,7 +1,6 @@
 package com.musicjournal.musicjournal.domain.review.entity;
 
 import com.musicjournal.musicjournal.domain.auth.entity.User;
-import com.musicjournal.musicjournal.domain.follow.entity.Follow;
 import com.musicjournal.musicjournal.domain.review.dto.AlbumReviewProjections;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

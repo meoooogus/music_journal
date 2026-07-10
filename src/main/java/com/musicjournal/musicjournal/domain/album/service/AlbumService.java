@@ -6,6 +6,8 @@ import com.musicjournal.musicjournal.domain.album.dto.TrendingResDto;
 import com.musicjournal.musicjournal.domain.album.entity.Album;
 import com.musicjournal.musicjournal.domain.album.entity.AlbumRepository;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
+import com.musicjournal.musicjournal.exception.CustomException;
+import com.musicjournal.musicjournal.exception.ErrorCode;
 import com.musicjournal.musicjournal.spotify.SpotifyApiService;
 import com.musicjournal.musicjournal.spotify.dto.SpotifyAlbumResDto;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,11 @@ public class AlbumService {
                                 .totalTracks(dto.getTotalTracks())
                                 .build()
                 ));
+    }
+
+    public Album getBySpotifyAlbumId(String spotifyAlbumId) {
+        return albumRepository.findBySpotifyAlbumId(spotifyAlbumId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ALBUM_NOT_FOUND));
     }
 
     // 외부 API 호출과 DB 조회를 트랜잭션 분리 — 커넥션 점유 최소화

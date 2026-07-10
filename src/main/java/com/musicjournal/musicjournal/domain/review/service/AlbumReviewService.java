@@ -2,7 +2,6 @@ package com.musicjournal.musicjournal.domain.review.service;
 
 import com.musicjournal.musicjournal.domain.album.dto.AlbumReqDto;
 import com.musicjournal.musicjournal.domain.album.entity.Album;
-import com.musicjournal.musicjournal.domain.album.entity.AlbumRepository;
 import com.musicjournal.musicjournal.domain.album.service.AlbumService;
 import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
 import com.musicjournal.musicjournal.domain.review.dto.AlbumReviewReqDto;
@@ -23,14 +22,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AlbumReviewService {
     private final AlbumReviewRepository albumReviewRepository;
-    private final AlbumRepository albumRepository;
     private final AlbumService albumService;
 
     @Transactional
     public AlbumReviewResDto upsertReview(String spotifyAlbumId, AlbumReviewReqDto dto, CustomUserDetails userDetails) {
         // 앨범 조회 - PUT /albums/{spotifyAlbumId} 선행
-        Album album = albumRepository.findBySpotifyAlbumId(spotifyAlbumId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ALBUM_NOT_FOUND));
+        Album album = albumService.getBySpotifyAlbumId(spotifyAlbumId);
 
         // 기존 리뷰 존재 시 수정, 없으면 신규 생성
         AlbumReview review = albumReviewRepository.findMyReview(userDetails.getUser(), spotifyAlbumId)
