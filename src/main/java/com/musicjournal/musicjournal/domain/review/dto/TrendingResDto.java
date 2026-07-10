@@ -1,4 +1,4 @@
-package com.musicjournal.musicjournal.domain.album.dto;
+package com.musicjournal.musicjournal.domain.review.dto;
 
 import lombok.Builder;
 import lombok.Getter;

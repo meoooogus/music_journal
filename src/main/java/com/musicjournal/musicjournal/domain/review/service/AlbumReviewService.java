@@ -7,15 +7,20 @@ import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
 import com.musicjournal.musicjournal.domain.review.dto.AlbumReviewReqDto;
 import com.musicjournal.musicjournal.domain.review.dto.AlbumReviewResDto;
 import com.musicjournal.musicjournal.domain.review.dto.RecommendationReqDto;
+import com.musicjournal.musicjournal.domain.review.dto.TrendingResDto;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumRecommendation;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReview;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
 import com.musicjournal.musicjournal.exception.CustomException;
 import com.musicjournal.musicjournal.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -89,6 +94,42 @@ public class AlbumReviewService {
                 .artworkUrl(rec.getArtworkUrl())
                 .releaseDate(rec.getReleaseDate())
                 .totalTracks(rec.getTotalTracks())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public TrendingResDto getTrending() {
+        // 최근 30일 기준 trending 조회
+        LocalDateTime since = LocalDate.now().minusDays(30).atStartOfDay();
+        Pageable topN = PageRequest.of(0, 5);
+
+        // 최근 30일 리뷰 수 TOP 5
+        List<TrendingResDto.MostReviewedDto> mostReviewed = albumReviewRepository
+                .findMostReviewed(since, topN).stream()
+                .map(p -> TrendingResDto.MostReviewedDto.builder()
+                        .spotifyAlbumId(p.getSpotifyAlbumId())
+                        .albumName(p.getAlbumName())
+                        .artistName(p.getArtistName())
+                        .artworkUrl(p.getArtworkUrl())
+                        .reviewCount(p.getReviewCount())
+                        .build())
+                .toList();
+
+        // 최근 30일 평균 평점 TOP 5
+        List<TrendingResDto.HighestRatedDto> highestRated = albumReviewRepository
+                .findHighestRated(since, topN).stream()
+                .map(p -> TrendingResDto.HighestRatedDto.builder()
+                        .spotifyAlbumId(p.getSpotifyAlbumId())
+                        .albumName(p.getAlbumName())
+                        .artistName(p.getArtistName())
+                        .artworkUrl(p.getArtworkUrl())
+                        .avgRating(p.getAvgRating())
+                        .build())
+                .toList();
+
+        return TrendingResDto.builder()
+                .mostReviewed(mostReviewed)
+                .highestRated(highestRated)
                 .build();
     }
 }
