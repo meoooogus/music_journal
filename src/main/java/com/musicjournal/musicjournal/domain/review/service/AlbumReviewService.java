@@ -49,8 +49,13 @@ public class AlbumReviewService {
                                 .build()
                 ));
 
-        // 추천 앨범 처리
-        review.updateRecommendations(buildRecommendations(dto.getRecommendations(), review));
+        // 추천 앨범 처리 — DTO 필드 기본값이 new ArrayList<>()이지만,
+        // 클라이언트가 "recommendations": null로 보내면 Jackson이 null로 덮어씀
+        // (프론트엔드 실수, Postman/curl 직접 호출, 외부 서비스 연동 등)
+        List<RecommendationReqDto> recs = dto.getRecommendations();
+        review.updateRecommendations(
+                recs == null ? List.of() : buildRecommendations(recs, review)
+        );
 
         return AlbumReviewResDto.from(review);
     }
