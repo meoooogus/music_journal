@@ -15,6 +15,13 @@ public class TrackService {
     @Transactional
     public Track upsert(TrackReqDto dto) {
         return trackRepository.findBySpotifyId(dto.getSpotifyId())
+                .map(track -> {
+                    // 기존 트랙 — Spotify 최신 정보로 동기화 (dirty checking으로 자동 UPDATE)
+                    track.update(dto.getTitle(), dto.getArtistName(), dto.getArtistId(),
+                            dto.getArtworkUrl(), dto.getAlbumName(), dto.getAlbumId(),
+                            dto.getDurationMs());
+                    return track;
+                })
                 .orElseGet(() -> trackRepository.save(
                         Track.builder()
                                 .spotifyId(dto.getSpotifyId())
