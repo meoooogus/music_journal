@@ -1,6 +1,7 @@
 package com.musicjournal.musicjournal.domain.review.entity;
 
 import com.musicjournal.musicjournal.domain.auth.entity.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,12 @@ public interface AlbumReviewRepository extends JpaRepository<AlbumReview, Long> 
 
     @Query("SELECT DISTINCT r FROM AlbumReview r LEFT JOIN FETCH r.recommendations WHERE r.user = :user AND r.album.spotifyAlbumId = :spotifyAlbumId")
     Optional<AlbumReview> findMyReview(@Param("user") User user, @Param("spotifyAlbumId") String spotifyAlbumId);
+
+    // 앨범 상세 preview용 — 최신 N개. 컬렉션(recommendations) fetch join을 빼야 DB 페이징이 실제로 동작(HHH000104 회피),
+    // recommendations는 엔티티의 @BatchSize(20)로 배치 로딩. user는 to-one이라 fetch join해도 페이징 안전(N+1 방지)
+    @Query("SELECT r FROM AlbumReview r JOIN FETCH r.user " +
+           "WHERE r.album.spotifyAlbumId = :spotifyAlbumId ORDER BY r.createdAt DESC")
+    List<AlbumReview> findRecentReviews(@Param("spotifyAlbumId") String spotifyAlbumId, Pageable pageable);
 
     // 앨범별 평균 평점
     @Query("SELECT AVG(r.rating) FROM AlbumReview r WHERE r.album.spotifyAlbumId = :spotifyAlbumId")

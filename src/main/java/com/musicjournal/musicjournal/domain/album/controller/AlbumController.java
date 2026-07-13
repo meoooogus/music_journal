@@ -2,12 +2,14 @@ package com.musicjournal.musicjournal.domain.album.controller;
 
 import com.musicjournal.musicjournal.domain.album.dto.AlbumDetailResDto;
 import com.musicjournal.musicjournal.domain.album.dto.AlbumReqDto;
+import com.musicjournal.musicjournal.domain.auth.entity.CustomUserDetails;
 import com.musicjournal.musicjournal.domain.review.dto.TrendingResDto;
 import com.musicjournal.musicjournal.domain.album.service.AlbumService;
 import com.musicjournal.musicjournal.domain.review.service.AlbumReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +21,11 @@ public class AlbumController {
     private final AlbumReviewService albumReviewService;
 
     @GetMapping("/{spotifyAlbumId}")
-    public ResponseEntity<AlbumDetailResDto> getAlbumDetail(@PathVariable String spotifyAlbumId) {
-        return ResponseEntity.ok(albumService.getAlbumDetail(spotifyAlbumId));
+    public ResponseEntity<AlbumDetailResDto> getAlbumDetail(
+            @PathVariable String spotifyAlbumId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(albumService.getAlbumDetail(spotifyAlbumId, userDetails.getUser()));
     }
 
     @GetMapping("/trending")
