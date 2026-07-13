@@ -8,7 +8,7 @@ import com.musicjournal.musicjournal.domain.profile.dto.ProfileResDto;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileReviewResDto;
 import com.musicjournal.musicjournal.domain.profile.dto.ProfileUpdateReqDto;
 import com.musicjournal.musicjournal.domain.follow.entity.FollowRepository;
-import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
+import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewUserRepository;
 import com.musicjournal.musicjournal.domain.stats.dto.StatsResDto;
 import com.musicjournal.musicjournal.domain.stats.service.StatsService;
 import com.musicjournal.musicjournal.exception.CustomException;
@@ -24,7 +24,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ProfileService {
 
-    private final AlbumReviewRepository albumReviewRepository;
+    private final AlbumReviewUserRepository albumReviewUserRepository;
     private final UserRepository userRepository;
     private final StatsService statsService;
     private final FollowRepository followRepository;
@@ -33,7 +33,7 @@ public class ProfileService {
     public ProfileMyResDto getMyProfile(CustomUserDetails userDetails) {
         User user = userDetails.getUser();
 
-        List<ProfileReviewResDto> reviews = albumReviewRepository
+        List<ProfileReviewResDto> reviews = albumReviewUserRepository
                 .findByUserOrderByCreatedAtDesc(user).stream()
                 .map(ProfileReviewResDto::from)
                 .toList();
@@ -71,7 +71,7 @@ public class ProfileService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        List<ProfileReviewResDto> reviews = albumReviewRepository
+        List<ProfileReviewResDto> reviews = albumReviewUserRepository
                 .findByUserOrderByCreatedAtDesc(user).stream()
                 .map(ProfileReviewResDto::from)
                 .toList();

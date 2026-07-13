@@ -11,6 +11,7 @@ import com.musicjournal.musicjournal.domain.review.dto.TrendingResDto;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumRecommendation;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReview;
 import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewRepository;
+import com.musicjournal.musicjournal.domain.review.entity.AlbumReviewTrendingRepository;
 import com.musicjournal.musicjournal.exception.CustomException;
 import com.musicjournal.musicjournal.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AlbumReviewService {
     private final AlbumReviewRepository albumReviewRepository;
+    private final AlbumReviewTrendingRepository albumReviewTrendingRepository;
     private final AlbumService albumService;
 
     @Transactional
@@ -109,7 +111,7 @@ public class AlbumReviewService {
         Pageable topN = PageRequest.of(0, 5);
 
         // 최근 30일 리뷰 수 TOP 5
-        List<TrendingResDto.MostReviewedDto> mostReviewed = albumReviewRepository
+        List<TrendingResDto.MostReviewedDto> mostReviewed = albumReviewTrendingRepository
                 .findMostReviewed(since, topN).stream()
                 .map(p -> TrendingResDto.MostReviewedDto.builder()
                         .spotifyAlbumId(p.getSpotifyAlbumId())
@@ -121,7 +123,7 @@ public class AlbumReviewService {
                 .toList();
 
         // 최근 30일 평균 평점 TOP 5
-        List<TrendingResDto.HighestRatedDto> highestRated = albumReviewRepository
+        List<TrendingResDto.HighestRatedDto> highestRated = albumReviewTrendingRepository
                 .findHighestRated(since, topN).stream()
                 .map(p -> TrendingResDto.HighestRatedDto.builder()
                         .spotifyAlbumId(p.getSpotifyAlbumId())
