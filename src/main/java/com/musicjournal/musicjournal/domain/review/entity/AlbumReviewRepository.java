@@ -15,7 +15,10 @@ import java.util.Optional;
 
 public interface AlbumReviewRepository extends JpaRepository<AlbumReview, Long> {
 
-    @Query("SELECT DISTINCT r FROM AlbumReview r LEFT JOIN FETCH r.recommendations WHERE r.album.spotifyAlbumId = :spotifyAlbumId")
+    // JOIN FETCH r.user: ResDto가 user.username을 읽으므로 미포함 시 리뷰 N건마다 user 프록시 초기화 쿼리(N+1) 발생
+    // ORDER BY createdAt DESC: 정렬 미지정 시 순서 비결정적 → 최신순 고정
+    @Query("SELECT DISTINCT r FROM AlbumReview r JOIN FETCH r.user LEFT JOIN FETCH r.recommendations " +
+           "WHERE r.album.spotifyAlbumId = :spotifyAlbumId ORDER BY r.createdAt DESC")
     List<AlbumReview> findReviewsBySpotifyAlbumId(@Param("spotifyAlbumId") String spotifyAlbumId);
 
     @Query("SELECT DISTINCT r FROM AlbumReview r LEFT JOIN FETCH r.recommendations WHERE r.user = :user AND r.album.spotifyAlbumId = :spotifyAlbumId")
